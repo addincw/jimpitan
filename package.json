@@ -1,0 +1,35 @@
+{
+  "name": "jimpitan",
+  "version": "1.0.0",
+  "description": "Website for reporting & collecting jimpitan (deposit) from residents based on their live",
+  "main": "dist/app.js",
+  "type": "module",
+  "scripts": {
+    "build": "concurrently \"npm run tsc\" \"npm run copyfiles\"",
+    "dev": "concurrently \"tsc --watch\" \"npm run copyfiles:watch\" \"nodemon dist/app.js\"",
+    "start": "node dist/app.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "tsc": "tsc -p tsconfig.json",
+    "copyfiles": "copyfiles -u 1 src/**/*.hbs dist",
+    "copyfiles:watch": "chokidar \"src/**/*.hbs\" -c \"npm run copyfiles\""
+  },
+  "author": "addin cendekia",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "express-handlebars": "^7.1.2",
+    "moment": "^2.30.1",
+    "typescript": "^5.3.3"
+  },
+  "devDependencies": {
+    "@addincendekia/template-gradfull": "^2.1.1",
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.11.0",
+    "chokidar": "^3.5.3",
+    "chokidar-cli": "^3.0.0",
+    "concurrently": "^8.2.2",
+    "copyfiles": "^2.4.1",
+    "nodemon": "^3.0.2"
+  }
+}
