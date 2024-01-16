@@ -1,11 +1,13 @@
 {
   "compilerOptions": {
     "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
     "moduleResolution": "Node",
     "target": "ES6",
     "module": "ESNext",
     "outDir": "dist/",
-    "sourceMap": true
+    "sourceMap": true,
+    "typeRoots": ["./types", "./node_modules/@types"],
   },
   "include": ["src/**/*.mts"],
   "exclude": ["node_modules"]

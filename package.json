@@ -2,11 +2,11 @@
   "name": "jimpitan",
   "version": "1.0.0",
   "description": "Website for reporting & collecting jimpitan (deposit) from residents based on their live",
-  "main": "dist/app.js",
+  "main": "dist/app.mjs",
   "type": "module",
   "scripts": {
-    "build": "concurrently \"npm run tsc\" \"npm run copyfiles\"",
-    "dev": "concurrently \"tsc --watch\" \"npm run copyfiles:watch\" \"nodemon dist/app.mjs\"",
+    "build": "concurrently \"rm -rf dist\" \"npm run tsc\" \"npm run copyfiles\"",
+    "dev": "concurrently \"rm -rf dist\" \"npm run copyfiles\" \"tsc --watch\" \"npm run copyfiles:watch\" \"nodemon dist/app.mjs\"",
     "start": "node dist/app.mjs",
     "test": "echo \"Error: no test specified\" && exit 1",
     "tsc": "tsc -p tsconfig.json",
@@ -19,6 +19,7 @@
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "express-handlebars": "^7.1.2",
+    "handlebars-layouts": "^3.1.4",
     "moment": "^2.30.1",
     "typescript": "^5.3.3"
   },
