@@ -1,36 +1,21 @@
 import "dotenv/config";
+import { fileURLToPath } from "url";
 import express, { Response } from "express";
-import handlebars from "handlebars";
-import handlebarsLayouts from "handlebars-layouts";
 import path from "path";
 
-import { engine as exphbs } from "express-handlebars";
-import { fileURLToPath } from "url";
-
-import frontRoutes from "./routes/front.mjs";
 import adminRoutes from "./routes/admin.mjs";
+import frontRoutes from "./routes/front.mjs";
+import viewEngine, { viewDir, viewExtFile } from "./config/view.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// define template engine
-app.engine(
-	".hbs",
-	exphbs({
-		defaultLayout: false,
-		extname: ".hbs",
-		helpers: {
-			...handlebarsLayouts(handlebars),
-			stringify(value: any) {
-				return JSON.stringify(value);
-			},
-		},
-	})
-);
-app.set("view engine", ".hbs");
-app.set("views", path.join(__dirname + "/views"));
+// configure template engine
+app.engine(viewExtFile, viewEngine);
+app.set("view engine", viewExtFile);
+app.set("views", path.join(__dirname + viewDir));
 
 // define global variables
 app.use((_, res: Response, next) => {
@@ -44,8 +29,8 @@ app.use(express.static("public"));
 app.use("/", frontRoutes);
 app.use("/admin", adminRoutes);
 
-app.listen(process.env.NODE_PORT, () => {
+app.listen(process.env.APP_PORT, () => {
 	console.log(
-		`${process.env.APP_NAME} app listening on port ${process.env.NODE_PORT}`
+		`${process.env.APP_NAME} app is running on ${process.env.APP_URL}:${process.env.APP_PORT}`
 	);
 });
