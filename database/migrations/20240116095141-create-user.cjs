@@ -25,7 +25,7 @@ module.exports = {
 			},
 			role_id: {
 				allowNull: false,
-				defaultValue: 2, // administrator = 0; functionary = 1, resident = 2
+				defaultValue: 3, // administrator = 1; functionary = 2, resident = 3
 				references: {
 					key: "id",
 					model: "roles",
