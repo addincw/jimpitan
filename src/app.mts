@@ -1,6 +1,9 @@
 import "dotenv/config";
 import express, { Response } from "express";
+import handlebars from "handlebars";
+import handlebarsLayouts from "handlebars-layouts";
 import path from "path";
+
 import { engine as exphbs } from "express-handlebars";
 import { fileURLToPath } from "url";
 
@@ -19,6 +22,7 @@ app.engine(
 		defaultLayout: false,
 		extname: ".hbs",
 		helpers: {
+			...handlebarsLayouts(handlebars),
 			stringify(value: any) {
 				return JSON.stringify(value);
 			},
