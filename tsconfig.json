@@ -7,6 +7,6 @@
     "outDir": "dist/",
     "sourceMap": true
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.mts"],
   "exclude": ["node_modules"]
 }

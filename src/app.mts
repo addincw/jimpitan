@@ -4,8 +4,8 @@ import path from "path";
 import { engine as exphbs } from "express-handlebars";
 import { fileURLToPath } from "url";
 
-import frontRoutes from "./routes/front.js";
-import adminRoutes from "./routes/admin.js";
+import frontRoutes from "./routes/front.mjs";
+import adminRoutes from "./routes/admin.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
