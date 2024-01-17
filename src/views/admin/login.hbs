@@ -1,1 +1,158 @@
-<h1>{{title}} Page</h1>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>{{title}}{{#if appName}} | {{/if}}{{appName}} Admin</title>
+		<link rel="stylesheet" href="/plugins/fontawesome-free/css/all.min.css" />
+		<link
+			rel="stylesheet"
+			href="/plugins/icheck-bootstrap/icheck-bootstrap.min.css"
+		/>
+		<link rel="stylesheet" href="/css/adminlte.min.css" />
+	</head>
+	<body class="login-page" style="min-height: 496.781px;">
+		<div x-data="{ loginAs: 'functionary' }" class="login-box">
+			<div class="login-logo">
+				<a href="/"><b>Jimpitan</b>Admin</a>
+			</div>
+
+			<div class="card">
+				<div class="card-body login-card-body">
+					<template x-if="loginAs === 'functionary'">
+						<div>
+							<p class="login-box-msg text-left px-0">
+								<b>Collector Iuran</b>
+								silahkan sign in menggunakan
+								<b>PIN</b>. Hubungi administrator jika lupa PIN anda.
+							</p>
+							<form action="/admin/login" method="post">
+								<input type="hidden" name="role" x-bind:value="loginAs" />
+								<div class="input-group mb-3">
+									<input
+										type="text"
+										class="form-control"
+										name="username"
+										placeholder="PIN 4 digit"
+									/>
+									<div class="input-group-append">
+										<div class="input-group-text">
+											<span class="fas fa-key"></span>
+										</div>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-8">
+										{{! <div class="icheck-primary">
+									<input type="checkbox" id="remember" />
+									<label for="remember">
+										Remember Me
+									</label>
+								</div> }}
+									</div>
+
+									<div class="col-4">
+										<button type="submit" class="btn btn-primary btn-block">
+											Sign In
+										</button>
+									</div>
+
+								</div>
+							</form>
+						</div>
+					</template>
+
+					<template x-if="loginAs === 'administrator'">
+						<div>
+							<p class="login-box-msg text-left px-0">
+								<b>Administrator</b>
+								silahkan sign in menggunakan
+								<b>username dan password</b>. Hubungi developer jika lupa
+								username dan password anda.
+							</p>
+							<form action="/admin/login" method="post">
+								<input type="hidden" name="role" x-bind:value="loginAs" />
+								<div class="input-group mb-3">
+									<input
+										type="text"
+										class="form-control"
+										name="username"
+										placeholder="Username"
+									/>
+									<div class="input-group-append">
+										<div class="input-group-text">
+											<span class="fas fa-user"></span>
+										</div>
+									</div>
+								</div>
+								<div class="input-group mb-3">
+									<input
+										type="password"
+										class="form-control"
+										name="password"
+										placeholder="Password"
+									/>
+									<div class="input-group-append">
+										<div class="input-group-text">
+											<span class="fas fa-lock"></span>
+										</div>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-8">
+										{{! <div class="icheck-primary">
+									<input type="checkbox" id="remember" />
+									<label for="remember">
+										Remember Me
+									</label>
+								</div> }}
+									</div>
+
+									<div class="col-4">
+										<button type="submit" class="btn btn-primary btn-block">
+											Sign In
+										</button>
+									</div>
+
+								</div>
+							</form>
+						</div>
+					</template>
+
+					<div class="social-auth-links text-center mb-3">
+						<p>- OR -</p>
+						<template x-if="loginAs === 'functionary'">
+							<button
+								class="btn btn-block btn-danger"
+								x-on:click="loginAs = 'administrator'"
+							>
+								<i class="fas fa-chess-queen mr-2"></i>
+								Sign in as Administrator
+							</button>
+						</template>
+						<template x-if="loginAs === 'administrator'">
+							<button
+								class="btn btn-block btn-info"
+								x-on:click="loginAs = 'functionary'"
+							>
+								<i class="fas fa-chess-queen mr-2"></i>
+								Sign in as Collector Iuran
+							</button>
+						</template>
+					</div>
+
+					{{! <p class="mb-1">
+						<a href="/admin/forgot-password">I forgot my password</a>
+					</p> }}
+				</div>
+			</div>
+		</div>
+
+		<script src="/plugins/jquery/jquery.min.js"></script>
+		<script src="/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+		<script src="/js/adminlte.min.js"></script>
+		<script
+			defer
+			src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
+		></script>
+	</body>
+</html>
