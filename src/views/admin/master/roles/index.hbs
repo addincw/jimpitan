@@ -1,0 +1,89 @@
+<div class="card">
+	<div class="card-header">
+		<div
+			class="card-title row g-3 align-items-center"
+			style="font-size: medium;"
+		>
+			<div class="col-auto">
+				<label for="inputPassword6" class="col-form-label">Show</label>
+			</div>
+			<div class="col-auto">
+				<select
+					class="form-select"
+					name="per_page"
+					aria-label="Data per halaman"
+				>
+					<option value="10" selected="">10</option>
+					<option value="20">20</option>
+					<option value="30">30</option>
+				</select>
+			</div>
+			<div class="col-auto">
+				<span class="form-text">Entries</span>
+			</div>
+		</div>
+		<div class="card-tools">
+			<a
+				class="btn btn-primary"
+				data-bs-toggle="collapse"
+				href="#collapse-jimpitan-report-filter"
+				role="button"
+				aria-expanded="true"
+				aria-controls="collapse-jimpitan-report-filter"
+			>
+				<i class="fas fa-filter me-1"></i>
+				Filter Riwayat
+			</a>
+		</div>
+	</div>
+	<div class="card-body p-0">
+		<table class="table">
+			<thead>
+				<tr>
+					<th>Nama Role</th>
+					<th>Key</th>
+					<th class="text-center" style="width: 60px">
+						<i class="fas fa-ellipsis-v"></i>
+					</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>Administrator</td>
+					<td>administrator</td>
+					<td>
+						<div class="dropdown">
+							<button
+								class="btn btn-outline-dark dropdown-toggle"
+								type="button"
+								id="btn-role-opt"
+								data-bs-toggle="dropdown"
+								aria-expanded="false"
+							>
+								<i class="fas fa-ellipsis-v"></i>
+							</button>
+							<ul class="dropdown-menu" aria-labelledby="btn-role-opt">
+								<li><a class="dropdown-item" href="#">Edit</a></li>
+								<li><a class="dropdown-item" href="#">Hapus</a></li>
+							</ul>
+						</div>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	<div class="card-footer clearfix">
+		<div
+			class="d-flex flex-column flex-md-row align-items-center justify-content-between"
+		>
+			<p class="m-0">Showing 1 to 10 of 57 entries</p>
+			<ul class="pagination m-0">
+				<li class="page-item"><a class="page-link" href="#">«</a></li>
+				<li class="page-item"><a class="page-link" href="#">1</a></li>
+				<li class="page-item"><a class="page-link" href="#">2</a></li>
+				<li class="page-item"><a class="page-link" href="#">3</a></li>
+				<li class="page-item"><a class="page-link" href="#">»</a></li>
+			</ul>
+		</div>
+	</div>
+</div>

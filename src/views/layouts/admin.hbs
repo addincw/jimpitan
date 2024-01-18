@@ -3,8 +3,167 @@
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>{{title}}{{#if appName}} | {{/if}}{{appName}}</title>
+		<link rel="stylesheet" href="/plugins/fontawesome-free/css/all.min.css" />
+		<link rel="stylesheet" href="/css/adminlte.min.css" />
+		{{#block "styles"}}{{/block}}
 	</head>
-	<body>
-		{{{body}}}
+	<body class="hold-trasition sidebar-mini">
+		<!-- Site wrapper -->
+		<div class="wrapper">
+			<!-- Navbar -->
+			<nav class="main-header navbar navbar-expand navbar-white navbar-light">
+				<!-- Left navbar links -->
+				<ul class="navbar-nav">
+					<li class="nav-item">
+						<a class="nav-link" data-widget="pushmenu" href="#" role="button">
+							<i class="fas fa-bars"></i>
+						</a>
+					</li>
+				</ul>
+
+				<!-- Right navbar links -->
+				<ul class="navbar-nav ml-auto">
+					<li class="nav-item">
+						<a class="nav-link" href="#" role="button">
+							Logout
+							<i class="pl-2 nav-icon fas fa-long-arrow-alt-right"></i>
+						</a>
+					</li>
+				</ul>
+			</nav>
+			<!-- /.navbar -->
+
+			<!-- Main Sidebar Container -->
+			<aside class="main-sidebar sidebar-dark-primary elevation-4">
+				<!-- Brand Logo -->
+				<a href="/admin" class="brand-link text-center">
+					<span class="brand-text font-weight-light"><b>Jimpitan</b>Admin</span>
+				</a>
+
+				<!-- Sidebar -->
+				<div class="sidebar">
+					<div class="user-panel mt-3 pb-3 mb-3 d-flex">
+						<div class="image">
+							<img
+								src="/img/avatar.png"
+								class="img-circle elevation-0"
+								alt="User Image"
+							/>
+						</div>
+						<div class="info">
+							<a href="#" class="d-block">Alexander Pierce</a>
+						</div>
+					</div>
+					<!-- Sidebar Menu -->
+					<nav class="mt-2">
+						<ul
+							class="nav nav-pills nav-sidebar flex-column"
+							data-widget="treeview"
+							role="menu"
+							data-accordion="false"
+						>
+							<!-- Add icons to the links using the .nav-icon class
+               with font-awesome or any other icon font library -->
+							<li class="nav-item">
+								<a href="/admin" class="nav-link">
+									<i class="nav-icon fas fa-house-user"></i>
+									<p>Dashboard</p>
+								</a>
+							</li>
+							<li class="nav-header">IURAN WARGA</li>
+							<li class="nav-item">
+								<a href="/admin/dues/income" class="nav-link">
+									<i class="nav-icon fas fa-donate"></i>
+									<p>
+										Collect Iuran
+										{{! <span class="badge badge-info right">2</span> }}
+									</p>
+								</a>
+							</li>
+							<li class="nav-item">
+								<a href="/admin/dues/expense" class="nav-link">
+									<i class="nav-icon fas fa-people-carry"></i>
+									<p>
+										Penyaluran Iuran
+									</p>
+								</a>
+							</li>
+							<li class="nav-header">KELOLA WARGA</li>
+							<li class="nav-item">
+								<a href="/admin/residential/community-assocs" class="nav-link">
+									<i class="nav-icon fas fa-project-diagram"></i>
+									<p>Rukun Warga (RW)</p>
+								</a>
+							</li>
+							<li class="nav-item">
+								<a href="/admin/residential/resident-assocs" class="nav-link">
+									<i class="nav-icon fas fa-users"></i>
+									<p>Rukun Tetangga (RT)</p>
+								</a>
+							</li>
+							<li class="nav-item">
+								<a href="/admin/residential/residents" class="nav-link">
+									<i class="nav-icon fas fa-id-badge"></i>
+									<p>Kepala Keluarga (KK)</p>
+								</a>
+							</li>
+							<li class="nav-header">KELOLA PENGGUNA</li>
+							<li class="nav-item">
+								<a href="/admin/master/roles" class="nav-link">
+									<i class="nav-icon fas fa-briefcase"></i>
+									<p>Role Pengguna</p>
+								</a>
+							</li>
+							<li class="nav-item">
+								<a href="/admin/master/users" class="nav-link">
+									<i class="nav-icon fas fa-user-cog"></i>
+									<p>Daftar Pengguna</p>
+								</a>
+							</li>
+						</ul>
+					</nav>
+					<!-- /.sidebar-menu -->
+				</div>
+				<!-- /.sidebar -->
+			</aside>
+
+			<!-- Content Wrapper. Contains page content -->
+			<div class="content-wrapper">
+				<!-- Content Header (Page header) -->
+				<section class="content-header">
+					<div class="container-fluid">
+						<div class="row mb-2">
+							<div class="col-sm-6">
+								<h1>{{title}}</h1>
+							</div>
+							<div class="col-sm-6">{{{breadcrumbs breadcrumbs}}}</div>
+							<div class="col-sm-6"></div>
+						</div>
+					</div>
+					<!-- /.container-fluid -->
+				</section>
+
+				<!-- Main content -->
+				<section class="content">{{{body}}}</section>
+				<!-- /.content -->
+			</div>
+			<!-- /.content-wrapper -->
+
+			<footer class="main-footer">
+				<div class="float-right d-none d-sm-block"><b>Version</b> 1.0.0</div>
+				<strong>Copyright &copy; 2024 Project Cendekia.</strong>
+				All rights reserved.
+			</footer>
+		</div>
+		<!-- ./wrapper -->
+
+		<script src="/plugins/jquery/jquery.min.js"></script>
+		<script src="/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+		<script src="/js/adminlte.min.js"></script>
+		<script
+			defer
+			src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
+		></script>
+		{{#block "scripts"}}{{/block}}
 	</body>
 </html>

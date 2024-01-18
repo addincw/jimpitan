@@ -3,8 +3,8 @@ import { fileURLToPath } from "url";
 import express, { Response } from "express";
 import path from "path";
 
-import adminRoutes from "./routes/admin.mjs";
-import frontRoutes from "./routes/front.mjs";
+import routeAdmins from "./routes/route-admin.mjs";
+import routeFronts from "./routes/route-front.mjs";
 import viewEngine, { viewDir, viewExtFile } from "./config/view.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -26,8 +26,8 @@ app.use((_, res: Response, next) => {
 app.use(express.static("public"));
 
 // define routes
-app.use("/", frontRoutes);
-app.use("/admin", adminRoutes);
+app.use("/", routeFronts);
+app.use("/admin", routeAdmins);
 
 app.listen(process.env.APP_PORT, () => {
 	console.log(

@@ -6,11 +6,35 @@ import { engine } from "express-handlebars";
 export const viewExtFile = ".hbs";
 export const viewDir = "/views";
 
+interface Breadcrumb {
+	name: string;
+	href?: string;
+	active: boolean;
+}
+
 export const viewEngine = engine({
 	defaultLayout: false,
 	extname: viewExtFile,
 	helpers: {
 		...handlebarsLayouts(handlebars),
+		breadcrumbs(breadcrumbs: Array<Breadcrumb>) {
+			const mapped = breadcrumbs.map((breadcrumb: Breadcrumb) => {
+				const cssClasses = ["breadcrumb-item"];
+
+				if (breadcrumb.active) cssClasses.push("active");
+
+				if (breadcrumb.href) {
+					return `
+						<li class="${cssClasses.join(" ")}">
+							<a href="${breadcrumb.href}">${breadcrumb.name}</a>
+						</li>
+					`;
+				}
+				return `<li class="${cssClasses.join(" ")}">${breadcrumb.name}</li>`;
+			});
+
+			return `<ol class="breadcrumb float-sm-right">${mapped.join("")}</ol>`;
+		},
 		stringify(value: any) {
 			return JSON.stringify(value);
 		},
