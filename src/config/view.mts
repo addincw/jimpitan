@@ -35,6 +35,9 @@ export const viewEngine = engine({
 
 			return `<ol class="breadcrumb float-sm-right">${mapped.join("")}</ol>`;
 		},
+		eq(value1: any, value2: any) {
+			return value1 === value2;
+		},
 		method(method: string) {
 			return `<input type="hidden" name="_method" value="${method.toUpperCase()}">`;
 		},
