@@ -1,11 +1,15 @@
 import "dotenv/config";
 import { fileURLToPath } from "url";
 import express, { Response } from "express";
+import flash from "connect-flash";
 import path from "path";
+import session from "express-session";
 
+import viewEngine, { viewDir, viewExtFile } from "./config/view.mjs";
+
+import flashParser from "./middlewares/flashParser.mjs";
 import routeAdmins from "./routes/route-admin.mjs";
 import routeFronts from "./routes/route-front.mjs";
-import viewEngine, { viewDir, viewExtFile } from "./config/view.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -23,7 +27,11 @@ app.use((_, res: Response, next) => {
 	next();
 });
 
+app.use(express.urlencoded({ extended: false }));
 app.use(express.static("public"));
+app.use(session({ secret: "candi", resave: false, saveUninitialized: false }));
+app.use(flash());
+app.use(flashParser());
 
 // define routes
 app.use("/", routeFronts);
