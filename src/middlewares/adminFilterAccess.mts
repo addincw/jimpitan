@@ -1,5 +1,7 @@
 import { NextFunction, Request, RequestHandler, Response } from "express";
 
+import { UserAttributes } from "../../database/models/models";
+
 export default function adminFilterAccess(): RequestHandler {
 	const noAuthRoutes = ["/login"];
 
@@ -24,8 +26,8 @@ export default function adminFilterAccess(): RequestHandler {
 			return res.redirect("/admin/login");
 		}
 
-		const userRoleId = (req.user as { role_id: number }).role_id;
-		const roleHasMenuAccess = new RegExp(menuAccess[userRoleId] ?? "").test(
+		const user = req.user as UserAttributes;
+		const roleHasMenuAccess = new RegExp(menuAccess[user.role_id] ?? "").test(
 			req.url
 		);
 		if (req.url !== "/" && !roleHasMenuAccess) {

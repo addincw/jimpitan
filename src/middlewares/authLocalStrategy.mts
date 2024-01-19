@@ -3,13 +3,13 @@ import { DoneCallback } from "passport";
 import { Strategy } from "passport-local";
 import bcrypt from "bcrypt";
 
+import { UserAttributes } from "../../database/models/models";
 import db from "../../database/models/index.cjs";
 
 const ADMIN_ID = 1;
 const ADMIN = "administrator";
 
 const { User } = db;
-const UserAttributes = User.getAttributes();
 
 const localStrategy = () => {
 	return new Strategy({ passReqToCallback: true }, async function verify(
@@ -43,10 +43,7 @@ const localStrategy = () => {
 	});
 };
 
-export const serializeUser = (
-	user: typeof UserAttributes,
-	done: DoneCallback
-) => {
+export const serializeUser = (user: UserAttributes, done: DoneCallback) => {
 	done(null, user.id);
 };
 
