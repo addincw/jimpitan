@@ -1,0 +1,116 @@
+<div 
+	class="card"
+	x-data="{
+		pagination: {{stringify pagination}},
+		init() {
+			this.$watch('pagination', (value) => {
+				const { currentPage, perPage } = value;
+
+				const qParams = new URLSearchParams();
+				qParams.append('pp', perPage);
+				qParams.append('p', currentPage);
+
+				window.location.href = '/admin/residential/community-assocs?' + qParams.toString();
+			});
+		}
+	}"
+>
+	<div class="card-header">
+		<div
+			class="card-title row g-3 align-items-center"
+			style="font-size: medium;"
+		>
+			<div class="col-auto">
+				<label for="per_page" class="col-form-label">Show</label>
+			</div>
+			<div class="col-auto">
+				<select
+					class="form-control"
+					name="per_page"
+					aria-label="Data per halaman"
+					x-on:change="pagination.perPage = $event.target.value"
+				>
+				{{#each perPageOpts as |opt|}}
+					<option value="{{opt}}" {{#if (eq opt ../pagination.perPage)}}selected=""{{/if}}>{{opt}}</option>
+				{{/each}}
+				</select>
+			</div>
+			<div class="col-auto">
+				<span class="form-text">Entries</span>
+			</div>
+		</div>
+		<div class="card-tools">
+			<a
+				class="btn btn-primary"
+				data-bs-toggle="collapse"
+				href="#collapse-jimpitan-report-filter"
+				role="button"
+				aria-expanded="true"
+				aria-controls="collapse-jimpitan-report-filter"
+			>
+				<i class="fas fa-plus me-1"></i>
+				Tambah RW
+			</a>
+		</div>
+	</div>
+	<div class="card-body p-0">
+		<table class="table">
+			<thead>
+				<tr>
+					<th>Nama Role</th>
+					<th>Key</th>
+					<th class="text-center" style="width: 60px"></th>
+				</tr>
+			</thead>
+			<tbody>
+				{{#each data as |item|}}
+					<tr>
+						<td>{{item.name}}</td>
+						<td>{{item.slug}}</td>
+						<td>
+							<div class="dropdown">
+								<button
+									class="btn btn-outline-dark dropdown-toggle"
+									type="button"
+									id="btn-role-opt"
+									data-toggle="dropdown"
+									aria-expanded="false"
+								>
+									<i class="fas fa-cog"></i>
+								</button>
+								<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="btn-role-opt">
+									<li><a class="dropdown-item" href="#">Edit</a></li>
+									<li><a class="dropdown-item" href="#">Hapus</a></li>
+								</ul>
+							</div>
+						</td>
+					</tr>
+				{{/each}}
+			</tbody>
+		</table>
+	</div>
+	<div class="card-footer clearfix">
+		<div
+			class="d-flex flex-column flex-md-row align-items-center justify-content-between"
+		>
+			<p class="m-0">Showing
+				{{pagination.currentPage}}
+				to {{data.length}} of
+				{{pagination.totalCount}}
+				entries</p>
+			<ul class="pagination m-0">
+				<li class="page-item{{#if (eq pagination.currentPage 1)}} disabled {{/if}}">
+					<a class="page-link" href="#" {{#if (eq pagination.currentPage 1)}} tabindex="-1" aria-disabled="true" {{/if}}>«</a>
+				</li>
+				{{#for 1 (increment pagination.totalPages 1)}}
+					<li class="page-item{{#if (eq ../pagination.currentPage this)}} active {{/if}}">
+						<a class="page-link" href="#">{{this}}</a>
+					</li>
+				{{/for}}
+				<li class="page-item{{#if (eq pagination.currentPage pagination.totalPages)}} disabled {{/if}}">
+					<a class="page-link" href="#" {{#if (eq pagination.currentPage 1)}} tabindex="-1" aria-disabled="true" {{/if}}>»</a>
+				</li>
+			</ul>
+		</div>
+	</div>
+</div>

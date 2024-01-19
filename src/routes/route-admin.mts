@@ -8,6 +8,7 @@ import authLocalStrategy, {
 import adminFilterAccess from "../middlewares/adminFilterAccess.mjs";
 
 import * as AuthController from "../controllers/AuthController.mjs";
+import * as CommunityAssocController from "../controllers/admin/residential/CommunityAssocController.mjs";
 import * as DashboardController from "../controllers/admin/DashboardController.mjs";
 import * as RoleController from "../controllers/admin/master/RoleController.mjs";
 
@@ -32,6 +33,8 @@ router.post(
 router.put("/logout", AuthController.logout);
 
 router.get("/", DashboardController.index);
+
+router.get("/residential/community-assocs", CommunityAssocController.index);
 
 router.get("/master/roles", RoleController.index);
 
