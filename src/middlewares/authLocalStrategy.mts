@@ -39,17 +39,20 @@ const localStrategy = () => {
 			return done(null, false, { message: errMessage });
 		}
 
-		return done(null, user);
+		return done(null, user.get({ plain: true }));
 	});
 };
 
-export const serializeUser = (user: typeof UserAttributes, done) => {
+export const serializeUser = (
+	user: typeof UserAttributes,
+	done: DoneCallback
+) => {
 	done(null, user.id);
 };
 
 export const deserializeUser = (id: number, done: DoneCallback) => {
 	User.findByPk(id as Identifier)
-		.then((user) => done(null, user))
+		.then((user) => done(null, user.get({ plain: true })))
 		.catch((err) => done(err, false));
 };
 

@@ -1,16 +1,15 @@
-import { Request, Response, Router } from "express";
+import { Router } from "express";
 import passport from "passport";
 
 import authLocalStrategy, {
 	deserializeUser,
 	serializeUser,
 } from "../middlewares/authLocalStrategy.mjs";
+import adminFilterAccess from "../middlewares/adminFilterAccess.mjs";
 
 import * as AuthController from "../controllers/AuthController.mjs";
 import * as DashboardController from "../controllers/admin/DashboardController.mjs";
 import * as RoleController from "../controllers/admin/master/RoleController.mjs";
-
-const noAuthRoutes = ["/login"];
 
 passport.use(authLocalStrategy());
 passport.serializeUser(serializeUser);
@@ -18,22 +17,7 @@ passport.deserializeUser(deserializeUser);
 
 const router = Router();
 
-// define local variable for this group routes
-router.use((req: Request, res: Response, next) => {
-	if (noAuthRoutes.includes(req.url)) {
-		return next();
-	}
-
-	res.locals.layout = "admin";
-	res.locals.breadcrumbs = [
-		{
-			name: "Home",
-			href: req.url != "/" && "/admin",
-			active: req.url == "/",
-		},
-	];
-	next();
-});
+router.use(adminFilterAccess());
 
 router.get("/login", AuthController.login);
 router.post(
@@ -44,6 +28,8 @@ router.post(
 	}),
 	AuthController.authenticate
 );
+
+router.put("/logout", AuthController.logout);
 
 router.get("/", DashboardController.index);
 

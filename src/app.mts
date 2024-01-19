@@ -2,12 +2,14 @@ import "dotenv/config";
 import { fileURLToPath } from "url";
 import express, { Response } from "express";
 import flash from "connect-flash";
+import passport from "passport";
 import path from "path";
 import session from "express-session";
 
 import viewEngine, { viewDir, viewExtFile } from "./config/view.mjs";
 
 import flashParser from "./middlewares/flashParser.mjs";
+import methodOverride from "./middlewares/methodOverride.mjs";
 import routeAdmins from "./routes/route-admin.mjs";
 import routeFronts from "./routes/route-front.mjs";
 
@@ -28,10 +30,12 @@ app.use((_, res: Response, next) => {
 });
 
 app.use(express.urlencoded({ extended: false }));
+app.use(methodOverride());
 app.use(express.static("public"));
 app.use(session({ secret: "candi", resave: false, saveUninitialized: false }));
 app.use(flash());
 app.use(flashParser());
+app.use(passport.authenticate("session"));
 
 // define routes
 app.use("/", routeFronts);

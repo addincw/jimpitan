@@ -24,10 +24,13 @@
 				<!-- Right navbar links -->
 				<ul class="navbar-nav ml-auto">
 					<li class="nav-item">
-						<a class="nav-link" href="#" role="button">
-							Logout
-							<i class="pl-2 nav-icon fas fa-long-arrow-alt-right"></i>
-						</a>
+						<form action="/admin/logout" method="POST">
+							{{{method "PUT"}}}
+							<button class="btn btn-link nav-link" type="submit">
+								Logout
+								<i class="pl-2 nav-icon fas fa-long-arrow-alt-right"></i>
+							</button>
+						</form>
 					</li>
 				</ul>
 			</nav>
