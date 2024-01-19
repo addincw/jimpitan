@@ -1,4 +1,4 @@
-import handlebars from "handlebars";
+import handlebars, { HelperOptions } from "handlebars";
 import handlebarsLayouts from "handlebars-layouts";
 
 import { engine } from "express-handlebars";
@@ -37,6 +37,17 @@ export const viewEngine = engine({
 		},
 		eq(value1: any, value2: any) {
 			return value1 === value2;
+		},
+		for(start: number, end: number, options: HelperOptions) {
+			let result = "";
+
+			for (let i = start; i < end; i++) {
+				result += options.fn(i);
+			}
+			return result;
+		},
+		increment(value: number, increment: number) {
+			return value + increment;
 		},
 		method(method: string) {
 			return `<input type="hidden" name="_method" value="${method.toUpperCase()}">`;

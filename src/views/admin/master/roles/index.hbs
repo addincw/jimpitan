@@ -13,9 +13,9 @@
 					name="per_page"
 					aria-label="Data per halaman"
 				>
-					<option value="10" selected="">10</option>
-					<option value="20">20</option>
-					<option value="30">30</option>
+				{{#each perPageOpts as |opt|}}
+					<option value="{{opt}}" {{#if (eq opt ../pagination.perPage)}}selected=""{{/if}}>{{opt}}</option>
+				{{/each}}
 				</select>
 			</div>
 			<div class="col-auto">
@@ -42,33 +42,33 @@
 				<tr>
 					<th>Nama Role</th>
 					<th>Key</th>
-					<th class="text-center" style="width: 60px">
-						<i class="fas fa-ellipsis-v"></i>
-					</th>
+					<th class="text-center" style="width: 60px"></th>
 				</tr>
 			</thead>
 			<tbody>
-				<tr>
-					<td>Administrator</td>
-					<td>administrator</td>
-					<td>
-						<div class="dropdown">
-							<button
-								class="btn btn-outline-dark dropdown-toggle"
-								type="button"
-								id="btn-role-opt"
-								data-bs-toggle="dropdown"
-								aria-expanded="false"
-							>
-								<i class="fas fa-ellipsis-v"></i>
-							</button>
-							<ul class="dropdown-menu" aria-labelledby="btn-role-opt">
-								<li><a class="dropdown-item" href="#">Edit</a></li>
-								<li><a class="dropdown-item" href="#">Hapus</a></li>
-							</ul>
-						</div>
-					</td>
-				</tr>
+				{{#each data as |item|}}
+					<tr>
+						<td>{{item.name}}</td>
+						<td>{{item.slug}}</td>
+						<td>
+							<div class="dropdown">
+								<button
+									class="btn btn-outline-dark dropdown-toggle"
+									type="button"
+									id="btn-role-opt"
+									data-bs-toggle="dropdown"
+									aria-expanded="false"
+								>
+									<i class="fas fa-cog"></i>
+								</button>
+								<ul class="dropdown-menu" aria-labelledby="btn-role-opt">
+									<li><a class="dropdown-item" href="#">Edit</a></li>
+									<li><a class="dropdown-item" href="#">Hapus</a></li>
+								</ul>
+							</div>
+						</td>
+					</tr>
+				{{/each}}
 			</tbody>
 		</table>
 	</div>
@@ -76,13 +76,23 @@
 		<div
 			class="d-flex flex-column flex-md-row align-items-center justify-content-between"
 		>
-			<p class="m-0">Showing 1 to 10 of 57 entries</p>
+			<p class="m-0">Showing
+				{{pagination.currentPage}}
+				to {{data.length}} of
+				{{pagination.totalCount}}
+				entries</p>
 			<ul class="pagination m-0">
-				<li class="page-item"><a class="page-link" href="#">«</a></li>
-				<li class="page-item"><a class="page-link" href="#">1</a></li>
-				<li class="page-item"><a class="page-link" href="#">2</a></li>
-				<li class="page-item"><a class="page-link" href="#">3</a></li>
-				<li class="page-item"><a class="page-link" href="#">»</a></li>
+				<li class="page-item{{#if (eq pagination.currentPage 1)}} disabled {{/if}}">
+					<a class="page-link" href="#" {{#if (eq pagination.currentPage 1)}} tabindex="-1" aria-disabled="true" {{/if}}>«</a>
+				</li>
+				{{#for 1 (increment pagination.totalPages 1)}}
+					<li class="page-item{{#if (eq ../pagination.currentPage this)}} active {{/if}}">
+						<a class="page-link" href="#">{{this}}</a>
+					</li>
+				{{/for}}
+				<li class="page-item{{#if (eq pagination.currentPage pagination.totalPages)}} disabled {{/if}}">
+					<a class="page-link" href="#" {{#if (eq pagination.currentPage 1)}} tabindex="-1" aria-disabled="true" {{/if}}>»</a>
+				</li>
 			</ul>
 		</div>
 	</div>
