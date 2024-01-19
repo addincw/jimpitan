@@ -40,14 +40,7 @@
 			</div>
 		</div>
 		<div class="card-tools">
-			<a
-				class="btn btn-primary"
-				data-bs-toggle="collapse"
-				href="#collapse-jimpitan-report-filter"
-				role="button"
-				aria-expanded="true"
-				aria-controls="collapse-jimpitan-report-filter"
-			>
+			<a class="btn btn-primary" href="/admin/residential/community-assocs/create">
 				<i class="fas fa-plus me-1"></i>
 				Tambah RW
 			</a>
@@ -57,8 +50,7 @@
 		<table class="table">
 			<thead>
 				<tr>
-					<th>Nama Role</th>
-					<th>Key</th>
+					<th>Nama RW</th>
 					<th class="text-center" style="width: 60px"></th>
 				</tr>
 			</thead>
@@ -66,7 +58,6 @@
 				{{#each data as |item|}}
 					<tr>
 						<td>{{item.name}}</td>
-						<td>{{item.slug}}</td>
 						<td>
 							<div class="dropdown">
 								<button

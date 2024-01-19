@@ -1,0 +1,25 @@
+<div class="card">
+	<form class="m-0" action="/admin/residential/community-assocs" method="post">
+		<div class="card-body">
+			<div class="form-group">
+				<label for="rw">Nama Rukun Warga (RW)</label>
+				<input
+					type="text"
+					class="form-control{{#if (lookup errors.fieldErrors "name")}} is-invalid{{/if}}" name="name"
+					id="rw"
+					placeholder="Cth: RW 00"
+				/>
+                {{#if (lookup errors.fieldErrors "name")}}
+                    <div class="invalid-feedback d-block">
+                        {{#each (lookup errors.fieldErrors "name") as |error|}}
+                            {{error}}
+                        {{/each}}
+                    </div>
+                {{/if}}
+			</div>
+		</div>
+		<div class="card-footer d-flex justify-content-end">
+			<button class="btn btn-primary" type="submit">Simpan</button>
+		</div>
+	</form>
+</div>

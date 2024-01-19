@@ -35,6 +35,11 @@ router.put("/logout", AuthController.logout);
 router.get("/", DashboardController.index);
 
 router.get("/residential/community-assocs", CommunityAssocController.index);
+router.get(
+	"/residential/community-assocs/create",
+	CommunityAssocController.create
+);
+router.post("/residential/community-assocs", CommunityAssocController.store);
 
 router.get("/master/roles", RoleController.index);
 
