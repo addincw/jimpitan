@@ -1,0 +1,57 @@
+{{#content "styles"}}
+	<link rel="stylesheet" href="/plugins/select2/css/select2.min.css" />
+{{/content}}
+
+<div x-data="initFormData()">
+    <div class="form-group">
+        <label>Rukun Warga (RW)</label>
+        <input type="hidden" name="community_assoc_id_init_val" value="{{optional (lookup ./old 'community_assoc_id') (lookup ./formData 'community_assoc_id')}}">
+        <select
+            class="form-control select2 {{echoif (lookup errors.fieldErrors 'community_assoc_id') 'is-invalid'}}"
+            name="community_assoc_id"
+        >
+            <option value=""></option>
+            {{#each communityAssocs as |communityAssoc|}}
+                <option value="{{communityAssoc.id}}">{{communityAssoc.name}}</option>
+            {{/each}}
+        </select>
+        {{> form/invalid-feedback fieldName="community_assoc_id"}}
+    </div>
+
+    <div class="form-group">
+        <label for="name">Nama Rukun Tetangga (RT)</label>
+        <input
+            class="form-control {{echoif (lookup errors.fieldErrors 'name') 'is-invalid'}}"
+            id="name"
+            name="name"
+            type="text"
+            placeholder="Cth: RT 00"
+            value="{{optional (lookup ./old 'name') (lookup ./formData 'name')}}"
+        />
+        {{> form/invalid-feedback fieldName="name"}}
+    </div>
+</div>
+
+{{#content "scripts"}}
+	<script type="text/javascript" src="/plugins/select2/js/select2.full.min.js"></script>
+    <script>
+        function initFormData() {
+            return {
+                init() {
+                    $(function () {
+                        
+                        const communityAssocSelection = $('.select2').select2({
+                            placeholder: "Pilih RW",
+                            allowClear: true,
+                        });
+                        
+                        const communityAssocIdInitVal = $('[name=\"community_assoc_id_init_val\"]').val();
+                        if (communityAssocIdInitVal) {
+                            communityAssocSelection.val(communityAssocIdInitVal).trigger('change');
+                        }
+                    });
+                }
+            }
+        }
+    </script>
+{{/content}}

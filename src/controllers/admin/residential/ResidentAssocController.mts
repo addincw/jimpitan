@@ -3,13 +3,14 @@ import { z } from "zod";
 
 import db from "../../../../database/models/index.cjs";
 
-const { ResidentAssoc } = db;
+const { CommunityAssoc, ResidentAssoc } = db;
 
 const baseRoute = "/admin/residential/resident-assocs";
 const baseRouteView = baseRoute.replace(new RegExp("^/"), "");
 
 const residentAssocFormSchema = z.object({
 	name: z.string().min(1),
+	community_assoc_id: z.number().min(1),
 });
 
 export { baseRoute, baseRouteView };
@@ -48,15 +49,23 @@ export async function index(req: Request, res: Response) {
 	});
 }
 
-export function create(req: Request, res: Response) {
+export async function create(req: Request, res: Response) {
+	const communityAssocs = await CommunityAssoc.findAll();
+
 	res.render(baseRouteView + "/create", {
 		title: "Tambah Rukun Tetangga (RT)",
+		communityAssocs: communityAssocs.map((row) => {
+			return row.toJSON();
+		}),
 	});
 }
 
 export async function store(req: Request, res: Response) {
 	try {
-		const validFormData = residentAssocFormSchema.parse(req.body);
+		const validFormData = residentAssocFormSchema.parse({
+			...req.body,
+			community_assoc_id: parseInt(req.body.community_assoc_id),
+		});
 
 		await ResidentAssoc.create(validFormData);
 
