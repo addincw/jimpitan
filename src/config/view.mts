@@ -55,6 +55,9 @@ export const viewEngine = engine({
 		method(method: string) {
 			return `<input type="hidden" name="_method" value="${method.toUpperCase()}">`;
 		},
+		optional(value1: string, value2: string) {
+			return typeof value1 === "string" ? value1 : value2;
+		},
 		stringify(value: any) {
 			return JSON.stringify(value);
 		},

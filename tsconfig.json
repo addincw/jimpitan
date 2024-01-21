@@ -9,6 +9,6 @@
     "sourceMap": true,
     "typeRoots": ["./types", "./node_modules/@types"],
   },
-  "include": ["src/**/*.mts"],
+  "include": ["types/index.d.ts", "src/**/*.mts"],
   "exclude": ["node_modules"]
 }

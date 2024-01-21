@@ -1,6 +1,6 @@
 import "dotenv/config";
 import { fileURLToPath } from "url";
-import express, { Response } from "express";
+import express, { Request, Response } from "express";
 import flash from "connect-flash";
 import passport from "passport";
 import path from "path";
@@ -23,12 +23,6 @@ app.engine(viewExtFile, viewEngine);
 app.set("view engine", viewExtFile);
 app.set("views", path.join(__dirname + viewDir));
 
-// define global variables
-app.use((_, res: Response, next) => {
-	res.locals.appName = process.env.APP_NAME;
-	next();
-});
-
 app.use(express.urlencoded({ extended: false }));
 app.use(methodOverride());
 app.use(express.static("public"));
@@ -36,6 +30,19 @@ app.use(session({ secret: "candi", resave: false, saveUninitialized: false }));
 app.use(flash());
 app.use(flashParser());
 app.use(passport.authenticate("session"));
+
+// define global variables
+app.use((req: Request, res: Response, next) => {
+	if (["POST", "PUT"].includes(req.method) && Object.keys(req.body).length) {
+		req.session.old = JSON.stringify(req.body);
+	} else if (req.session.old) {
+		res.locals.old = JSON.parse(req.session.old);
+		delete req.session.old;
+	}
+
+	res.locals.appName = process.env.APP_NAME;
+	next();
+});
 
 // define routes
 app.use("/", routeFronts);

@@ -32,7 +32,6 @@ export default function flashParser(): RequestHandler {
 		}
 
 		if (errorPayload && errorPayload.length) {
-			console.log(JSON.parse(errorPayload[0]));
 			res.locals.errors = JSON.parse(errorPayload[0]);
 		}
 

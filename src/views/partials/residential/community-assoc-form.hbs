@@ -6,6 +6,7 @@
         name="name"
         type="text"
         placeholder="Cth: RW 00"
+        value="{{optional (lookup ./old 'name') (lookup ./formData 'name')}}"
     />
     {{> form/invalid-feedback fieldName="name"}}
 </div>
