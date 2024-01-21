@@ -35,6 +35,9 @@ export const viewEngine = engine({
 
 			return `<ol class="breadcrumb float-sm-right">${mapped.join("")}</ol>`;
 		},
+		echoif(condition: Boolean, value: string) {
+			return condition ? value : "";
+		},
 		eq(value1: any, value2: any) {
 			return value1 === value2;
 		},
