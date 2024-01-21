@@ -104,3 +104,19 @@ export async function update(req: Request, res: Response) {
 		res.redirect(`/admin/residential/community-assocs/${id}`);
 	}
 }
+
+export async function destroy(req: Request, res: Response) {
+	const { id } = req.params;
+
+	try {
+		const data = await CommunityAssoc.findByPk(id);
+
+		if (data) data.destroy();
+
+		req.flash("success", "data berhasil dihapus");
+	} catch (error) {
+		req.flash("error", `gagal menghapus data: ${error.message}`);
+	}
+
+	res.redirect("/admin/residential/community-assocs");
+}

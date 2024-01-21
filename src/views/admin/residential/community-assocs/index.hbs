@@ -2,6 +2,19 @@
 	class="card"
 	x-data="{
 		pagination: {{stringify pagination}},
+		confirmDelete(id) {
+			Swal.fire({
+				showCancelButton: true,
+				title: 'Yakin untuk menghapus data?',
+				text: 'Data yang telah dihapus, tidak dapat dikembalikan.',
+				icon: 'warning',
+			})
+				.then((result) => {
+					if (result.isConfirmed) {
+						document.getElementById(`form-delete-${id}`).submit();
+					}
+				})
+		},
 		init() {
 			this.$watch('pagination', (value) => {
 				const { currentPage, perPage } = value;
@@ -73,7 +86,13 @@
 									<li>
 										<a class="dropdown-item" href="/admin/residential/community-assocs/{{item.id}}">Edit</a>
 									</li>
-									<li><a class="dropdown-item" href="#">Hapus</a></li>
+									<li>
+										<a class="dropdown-item" type="button" x-on:click="() => confirmDelete({{item.id}})">Hapus</a>
+										<form id="form-delete-{{item.id}}" class="d-none m-0" action="/admin/residential/community-assocs/{{item.id}}" method="post">
+											{{{method 'DELETE'}}}
+											<button type="submit"></button>
+										</form>
+									</li>
 								</ul>
 							</div>
 						</td>

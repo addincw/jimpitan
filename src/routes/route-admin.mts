@@ -45,6 +45,10 @@ router.put(
 	"/residential/community-assocs/:id",
 	CommunityAssocController.update
 );
+router.delete(
+	"/residential/community-assocs/:id",
+	CommunityAssocController.destroy
+);
 
 router.get("/master/roles", RoleController.index);
 
