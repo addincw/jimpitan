@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Response, Router } from "express";
 import passport from "passport";
 
 import authLocalStrategy, {
@@ -9,6 +9,7 @@ import adminFilterAccess from "../middlewares/adminFilterAccess.mjs";
 
 import * as AuthController from "../controllers/AuthController.mjs";
 import * as CommunityAssocController from "../controllers/admin/residential/CommunityAssocController.mjs";
+import * as ResidentAssocController from "../controllers/admin/residential/ResidentAssocController.mjs";
 import * as DashboardController from "../controllers/admin/DashboardController.mjs";
 import * as RoleController from "../controllers/admin/master/RoleController.mjs";
 
@@ -48,6 +49,25 @@ router.put(
 router.delete(
 	"/residential/community-assocs/:id",
 	CommunityAssocController.destroy
+);
+
+router.use((_, res: Response, next) => {
+	res.locals.baseRoute = ResidentAssocController.baseRoute;
+	res.locals.baseRouteView = ResidentAssocController.baseRouteView;
+
+	next();
+});
+router.get("/residential/resident-assocs", ResidentAssocController.index);
+router.get(
+	"/residential/resident-assocs/create",
+	ResidentAssocController.create
+);
+router.post("/residential/resident-assocs", ResidentAssocController.store);
+router.get("/residential/resident-assocs/:id", ResidentAssocController.edit);
+router.put("/residential/resident-assocs/:id", ResidentAssocController.update);
+router.delete(
+	"/residential/resident-assocs/:id",
+	ResidentAssocController.destroy
 );
 
 router.get("/master/roles", RoleController.index);
