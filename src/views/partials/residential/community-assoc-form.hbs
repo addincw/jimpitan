@@ -1,0 +1,11 @@
+<div class="form-group">
+    <label for="name">Nama Rukun Warga (RW)</label>
+    <input
+        class="form-control {{echoif (lookup errors.fieldErrors "name") "is-invalid"}}"
+        id="name"
+        name="name"
+        type="text"
+        placeholder="Cth: RW 00"
+    />
+    {{> form/invalid-feedback fieldName="name"}}
+</div>

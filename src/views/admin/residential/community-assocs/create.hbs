@@ -1,17 +1,7 @@
 <div class="card">
 	<form class="m-0" action="/admin/residential/community-assocs" method="post">
 		<div class="card-body">
-			<div class="form-group">
-				<label for="name">Nama Rukun Warga (RW)</label>
-				<input
-					class="form-control {{echoif (lookup errors.fieldErrors "name") "is-invalid"}}"
-					id="name"
-					name="name"
-					type="text"
-					placeholder="Cth: RW 00"
-				/>
-                {{> form/invalid-feedback fieldName="name"}}
-			</div>
+			{{> residential/community-assoc-form}}
 		</div>
 		<div class="card-footer d-flex justify-content-end">
 			<button class="btn btn-primary" type="submit">
