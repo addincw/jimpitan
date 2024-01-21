@@ -86,11 +86,15 @@ export async function store(req: Request, res: Response) {
 export async function edit(req: Request, res: Response) {
 	const { id } = req.params;
 
+	const communityAssocs = await CommunityAssoc.findAll();
 	const data = await ResidentAssoc.findByPk(id);
 
 	res.render(baseRouteView + "/edit", {
 		title: "Edit Rukun Tetangga (RT): " + data.get("name"),
-		data: data.toJSON(),
+		formData: data.toJSON(),
+		communityAssocs: communityAssocs.map((row) => {
+			return row.toJSON();
+		}),
 	});
 }
 
@@ -100,7 +104,10 @@ export async function update(req: Request, res: Response) {
 	try {
 		const data = await ResidentAssoc.findByPk(id);
 
-		const validFormData = residentAssocFormSchema.parse(req.body);
+		const validFormData = residentAssocFormSchema.parse({
+			...req.body,
+			community_assoc_id: parseInt(req.body.community_assoc_id),
+		});
 
 		await data.update(validFormData);
 

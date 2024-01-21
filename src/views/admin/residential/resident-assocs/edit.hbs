@@ -1,9 +1,9 @@
 <div class="card">
-	<form class="m-0" action="/admin/residential/community-assocs/{{data.id}}" method="post">
+	<form class="m-0" action="{{baseRoute}}/{{formData.id}}" method="post">
 		{{{method "PUT"}}}
-		<input type="hidden" name="id" value="{{data.id}}">
+		<input type="hidden" name="id" value="{{formData.id}}">
 		<div class="card-body">
-			{{> residential/community-assoc-form formData=data}}
+			{{> residential/resident-assoc-form}}
 		</div>
 		<div class="card-footer d-flex justify-content-end">
 			<button class="btn btn-primary" type="submit">
