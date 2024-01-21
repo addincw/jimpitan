@@ -40,6 +40,11 @@ router.get(
 	CommunityAssocController.create
 );
 router.post("/residential/community-assocs", CommunityAssocController.store);
+router.get("/residential/community-assocs/:id", CommunityAssocController.edit);
+router.put(
+	"/residential/community-assocs/:id",
+	CommunityAssocController.update
+);
 
 router.get("/master/roles", RoleController.index);
 

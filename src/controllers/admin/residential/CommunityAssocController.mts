@@ -67,3 +67,40 @@ export async function store(req: Request, res: Response) {
 		res.redirect("/admin/residential/community-assocs/create");
 	}
 }
+
+export async function edit(req: Request, res: Response) {
+	const { id } = req.params;
+
+	const data = await CommunityAssoc.findByPk(id);
+
+	res.render("admin/residential/community-assocs/edit", {
+		title: "Edit Rukun Warga (RW): " + data.get("name"),
+		data: data.toJSON(),
+	});
+}
+
+export async function update(req: Request, res: Response) {
+	const { id } = req.params;
+
+	try {
+		const data = await CommunityAssoc.findByPk(id);
+
+		const validFormData = communityAssocFormSchema.parse(req.body);
+
+		await data.update(validFormData);
+
+		req.flash("success", "data berhasil tersimpan");
+		res.redirect("/admin/residential/community-assocs");
+	} catch (error) {
+		req.flash("old", JSON.stringify(req.body));
+
+		if (error instanceof z.ZodError) {
+			req.flash("error", `gagal menyimpan data, periksa ulang form`);
+			req.flash("errorPayload", JSON.stringify(error.flatten()));
+		} else {
+			req.flash("error", `gagal menyimpan data: ${error.message}`);
+		}
+
+		res.redirect(`/admin/residential/community-assocs/${id}`);
+	}
+}
