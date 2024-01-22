@@ -1,3 +1,5 @@
+import { Identifier } from "sequelize";
+
 export interface CommunityAssocAttributes {
 	name: string;
 	color_code: string;
@@ -37,11 +39,14 @@ export interface UserAttributes {
 }
 
 export interface UserResidentAttributes {
+	id: Identifier;
 	user_id: number;
 	resident_assoc_id: number;
 	address: string;
 	createdAt: string;
 	updatedAt: string;
+	user: UserAttributes;
+	resident_assoc: ResidentAssocAttributes;
 }
 
 export interface UserFunctionaryAttributes {

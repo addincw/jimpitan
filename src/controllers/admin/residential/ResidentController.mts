@@ -1,4 +1,4 @@
-import { Op } from "sequelize";
+import { Identifier, Op } from "sequelize";
 import { Request, Response } from "express";
 import { z } from "zod";
 import moment from "moment";
@@ -184,11 +184,32 @@ export async function edit(req: Request, res: Response) {
 	const { id } = req.params;
 
 	const communityAssocs = await CommunityAssoc.findAll();
-	const data = await UserResident.findByPk(id);
+	const data = await UserResident.findByPk(id, {
+		include: [
+			"user",
+			{
+				model: ResidentAssoc,
+				as: "resident_assoc",
+				include: ["community_assoc"],
+			},
+		],
+	});
+
+	const userResidentData = data.toJSON();
+	const fullname =
+		userResidentData.user.firstname + " " + userResidentData.user.lastname;
 
 	res.render(baseRouteView + "/edit", {
-		title: "Edit Rukun Tetangga (RT): " + data.get("name"),
-		formData: data.toJSON(),
+		title: "Edit Kepala Keluarga (KK): " + fullname,
+		formData: {
+			id: userResidentData.id,
+			community_assoc_id: userResidentData.resident_assoc.community_assoc_id,
+			resident_assoc_id: userResidentData.resident_assoc_id,
+			firstname: userResidentData.user.firstname,
+			lastname: userResidentData.user.lastname,
+			address: userResidentData.address,
+			phone: userResidentData.user.phone,
+		},
 		communityAssocs: communityAssocs.map((row) => {
 			return row.toJSON();
 		}),
@@ -197,6 +218,8 @@ export async function edit(req: Request, res: Response) {
 
 export async function update(req: Request, res: Response) {
 	const { id } = req.params;
+
+	const dbTransaction = await sequelize.transaction();
 
 	try {
 		const data = await UserResident.findByPk(id);
@@ -207,11 +230,27 @@ export async function update(req: Request, res: Response) {
 			resident_assoc_id: parseInt(req.body.resident_assoc_id),
 		});
 
-		await data.update(validFormData);
+		const { firstname, lastname, phone, ...userResidentData } = validFormData;
+		const genUsername = firstname.toLowerCase() + generateRandomString(4);
+		const genPassword = hashMake(genUsername);
+
+		await data.update({ ...userResidentData });
+
+		(await User.findByPk(data.get("user_id") as Identifier)).update({
+			firstname,
+			lastname,
+			phone,
+			username: genUsername,
+			password: genPassword,
+		});
+
+		dbTransaction.commit();
 
 		req.flash("success", "data berhasil tersimpan");
 		res.redirect(baseRoute + "/");
 	} catch (error) {
+		dbTransaction.rollback();
+
 		req.flash("old", JSON.stringify(req.body));
 
 		if (error instanceof z.ZodError) {
