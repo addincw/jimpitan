@@ -3,21 +3,25 @@ import { Request, Response } from "express";
 import { z } from "zod";
 import moment from "moment";
 
+import { generateRandomString } from "../../../helpers/string.mjs";
+import { make as hashMake } from "../../../helpers/hash.mjs";
 import db from "../../../../database/models/index.cjs";
 
-const { CommunityAssoc, ResidentAssoc, UserResident } = db;
+const { sequelize, CommunityAssoc, ResidentAssoc, User, UserResident } = db;
 
 const baseRoute = "/admin/residential/residents";
 const baseRouteView = baseRoute.replace(new RegExp("^/"), "");
 
 const residentFormSchema = z.object({
-	firstname: z.string().min(1),
+	firstname: z.string().min(3),
 	lastname: z.string(),
-	address: z.string().min(1),
-	phone: z.string(),
-	email: z.string().email(),
-	username: z.string().min(1),
-	role_id: z.number().min(1),
+	address: z.string().min(10),
+	phone: z
+		.string()
+		.min(12)
+		.refine((value) => /^[0-9]+$/.test(value), {
+			message: "Value must be a number",
+		}),
 	resident_assoc_id: z.number().min(1),
 });
 
@@ -101,8 +105,8 @@ export async function index(req: Request, res: Response) {
 			const flattenRow = row.toJSON();
 			return {
 				...flattenRow,
-				createdAt: moment(flattenRow.createdAt).format("LLLL"),
-				updatedAt: moment(flattenRow.updatedAt).format("LLLL"),
+				createdAt: moment(flattenRow.createdAt).format("DD, MMM YYYY. HH:MM"),
+				updatedAt: moment(flattenRow.updatedAt).format("DD, MMM YYYY. HH:MM"),
 			};
 		}),
 		perPageOpts,
@@ -123,7 +127,7 @@ export async function create(req: Request, res: Response) {
 	const communityAssocs = await CommunityAssoc.findAll();
 
 	res.render(baseRouteView + "/create", {
-		title: "Tambah Rukun Tetangga (RT)",
+		title: "Tambah Kepala Keluarga (KK)",
 		communityAssocs: communityAssocs.map((row) => {
 			return row.toJSON();
 		}),
@@ -131,6 +135,8 @@ export async function create(req: Request, res: Response) {
 }
 
 export async function store(req: Request, res: Response) {
+	const dbTransaction = await sequelize.transaction();
+
 	try {
 		const validFormData = residentFormSchema.parse({
 			...req.body,
@@ -138,11 +144,31 @@ export async function store(req: Request, res: Response) {
 			resident_assoc_id: parseInt(req.body.resident_assoc_id),
 		});
 
-		await UserResident.create(validFormData);
+		const { firstname, lastname, phone, ...userResidentData } = validFormData;
+		const genUsername = firstname.toLowerCase() + generateRandomString(4);
+		const genPassword = hashMake(genUsername);
+
+		const user = await User.create({
+			firstname,
+			lastname,
+			phone,
+			username: genUsername,
+			password: genPassword,
+			role_id: 3, // resident = 3
+		});
+
+		await UserResident.create({
+			...userResidentData,
+			user_id: user.get("id") as number,
+		});
+
+		await dbTransaction.commit();
 
 		req.flash("success", "data berhasil tersimpan");
 		res.redirect(baseRoute + "/");
 	} catch (error) {
+		await dbTransaction.rollback();
+
 		if (error instanceof z.ZodError) {
 			req.flash("error", `gagal menyimpan data, periksa ulang form`);
 			req.flash("errorPayload", JSON.stringify(error.flatten()));
