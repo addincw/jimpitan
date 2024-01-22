@@ -1,3 +1,4 @@
+import { Op } from "sequelize";
 import { Request, Response } from "express";
 import { z } from "zod";
 import moment from "moment";
@@ -22,14 +23,47 @@ const residentFormSchema = z.object({
 
 export { baseRoute, baseRouteView };
 
+function buildWhereCondition(filters: {
+	communityAssocId: number;
+	residentAssocId: number;
+	q: string;
+}) {
+	let whereCondition: Record<string, any> = {};
+
+	if (filters.communityAssocId) {
+		whereCondition["$resident_assoc.community_assoc.id$"] =
+			filters.communityAssocId;
+	}
+
+	if (filters.residentAssocId) {
+		whereCondition.resident_assoc_id = {
+			[Op.eq]: filters.residentAssocId,
+		};
+	}
+
+	if (filters.q) {
+		whereCondition = {
+			...whereCondition,
+			[Op.or]: [
+				{ "$user.firstname$": { [Op.like]: `%${filters.q}%` } },
+				{ "$user.lastname$": { [Op.like]: `%${filters.q}%` } },
+			],
+		};
+	}
+
+	return whereCondition;
+}
+
 export async function index(req: Request, res: Response) {
-	const fCommunityAssocId = req.query["f.cai"]
-		? parseInt(req.query["f.cai"] as string)
-		: 0;
-	const fResidentAssocId = req.query["f.rai"]
-		? parseInt(req.query["f.rai"] as string)
-		: 0;
-	const fResidentName = req.query["f.q"] ? req.query["f.q"] : "";
+	const filters = {
+		communityAssocId: req.query["f.cai"]
+			? parseInt(req.query["f.cai"] as string)
+			: 0,
+		residentAssocId: req.query["f.rai"]
+			? parseInt(req.query["f.rai"] as string)
+			: 0,
+		q: req.query["f.q"] ? (req.query["f.q"] as string) : "",
+	};
 
 	const page = req.query.p ? parseInt(req.query.p as string) : 1;
 	const perPage = req.query.pp ? parseInt(req.query.pp as string) : 10;
@@ -39,6 +73,7 @@ export async function index(req: Request, res: Response) {
 	const offset = (page - 1) * perPage;
 
 	const data = await UserResident.findAndCountAll({
+		where: buildWhereCondition(filters),
 		include: [
 			"user",
 			{
@@ -80,11 +115,7 @@ export async function index(req: Request, res: Response) {
 			showTo: (currentPage - 1) * perPage + data.rows.length,
 			totalCount: data.count,
 		},
-		filters: {
-			communityAssocId: fCommunityAssocId,
-			residentAssocId: fResidentAssocId,
-			q: fResidentName,
-		},
+		filters,
 	});
 }
 
