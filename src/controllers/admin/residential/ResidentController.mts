@@ -244,12 +244,12 @@ export async function update(req: Request, res: Response) {
 			password: genPassword,
 		});
 
-		dbTransaction.commit();
+		await dbTransaction.commit();
 
 		req.flash("success", "data berhasil tersimpan");
 		res.redirect(baseRoute + "/");
 	} catch (error) {
-		dbTransaction.rollback();
+		await dbTransaction.rollback();
 
 		req.flash("old", JSON.stringify(req.body));
 
@@ -267,13 +267,24 @@ export async function update(req: Request, res: Response) {
 export async function destroy(req: Request, res: Response) {
 	const { id } = req.params;
 
-	try {
-		const data = await UserResident.findByPk(id);
+	const dbTransaction = await sequelize.transaction();
 
-		if (data) data.destroy();
+	try {
+		const data = await UserResident.findByPk(id, { include: ["user"] });
+
+		if (data) {
+			const user = ((data as typeof data) && { user: User }).user;
+
+			data.destroy();
+			user.destroy();
+		}
+
+		await dbTransaction.commit();
 
 		req.flash("success", "data berhasil dihapus");
 	} catch (error) {
+		await dbTransaction.rollback();
+
 		req.flash("error", `gagal menghapus data: ${error.message}`);
 	}
 
