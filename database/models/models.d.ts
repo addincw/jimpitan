@@ -1,6 +1,7 @@
 export interface CommunityAssocAttributes {
 	name: string;
 	color_code: string;
+	resident_assocs: ResidentAssocAttributes[];
 }
 
 export interface ResidentAssocAttributes {

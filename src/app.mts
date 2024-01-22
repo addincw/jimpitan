@@ -11,6 +11,7 @@ import viewEngine, { viewDir, viewExtFile } from "./config/view.mjs";
 import flashParser from "./middlewares/flashParser.mjs";
 import methodOverride from "./middlewares/methodOverride.mjs";
 import routeAdmins from "./routes/route-admin.mjs";
+import routeAPIs from "./routes/route-api.mjs";
 import routeFronts from "./routes/route-front.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -46,6 +47,7 @@ app.use((req: Request, res: Response, next) => {
 
 // define routes
 app.use("/", routeFronts);
+app.use("/api", routeAPIs);
 app.use("/admin", routeAdmins);
 
 app.listen(process.env.APP_PORT, () => {
