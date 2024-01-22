@@ -23,6 +23,14 @@ const residentFormSchema = z.object({
 export { baseRoute, baseRouteView };
 
 export async function index(req: Request, res: Response) {
+	const fCommunityAssocId = req.query["f.cai"]
+		? parseInt(req.query["f.cai"] as string)
+		: 0;
+	const fResidentAssocId = req.query["f.rai"]
+		? parseInt(req.query["f.rai"] as string)
+		: 0;
+	const fResidentName = req.query["f.q"] ? req.query["f.q"] : "";
+
 	const page = req.query.p ? parseInt(req.query.p as string) : 1;
 	const perPage = req.query.pp ? parseInt(req.query.pp as string) : 10;
 
@@ -47,8 +55,13 @@ export async function index(req: Request, res: Response) {
 	const totalPages = Math.ceil(data.count / perPage);
 	const currentPage = page;
 
+	const communityAssocs = await CommunityAssoc.findAll();
+
 	res.render(baseRouteView + "/index", {
 		title: "Kepala Keluarga (KK)",
+		communityAssocs: communityAssocs.map((row) => {
+			return row.toJSON();
+		}),
 		data: data.rows.map((row) => {
 			const flattenRow = row.toJSON();
 			return {
@@ -66,6 +79,11 @@ export async function index(req: Request, res: Response) {
 			showFrom: currentPage * perPage - (perPage - 1),
 			showTo: (currentPage - 1) * perPage + data.rows.length,
 			totalCount: data.count,
+		},
+		filters: {
+			communityAssocId: fCommunityAssocId,
+			residentAssocId: fResidentAssocId,
+			q: fResidentName,
 		},
 	});
 }

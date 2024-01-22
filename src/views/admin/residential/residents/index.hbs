@@ -1,3 +1,17 @@
+{{#content 'styles'}}
+<link rel="stylesheet" href="/plugins/select2/css/select2.min.css" />
+<style>
+	.card-header.filter {
+		background-color: rgba(0,0,0,.03);
+	}
+	.card-header.filter .btn-search {
+		padding-top: 0.6rem;
+		padding-bottom: 0.6rem;
+	}
+</style>
+{{/content}}
+
+<input type="hidden" name="init.filters" value="{{stringify filters}}">
 <input type="hidden" name="init.pagination" value="{{stringify pagination}}">
 
 <div class="card" x-data="initTableData()">
@@ -14,10 +28,12 @@
 					class="form-control"
 					name="per_page"
 					aria-label="Data per halaman"
-					x-on:change="pagination.perPage = $event.target.value"
+					x-on:change="pagination.perPage = $event.target.value; pagination.currentPage = 1;"
 				>
 				{{#each perPageOpts as |opt|}}
-					<option value="{{opt}}" {{#if (eq opt ../pagination.perPage)}}selected=""{{/if}}>{{opt}}</option>
+					<option value="{{opt}}" {{{echoif (eq opt ../pagination.perPage) 'selected=""'}}}>
+						{{opt}}
+					</option>
 				{{/each}}
 				</select>
 			</div>
@@ -32,14 +48,57 @@
 			</a>
 		</div>
 	</div>
+	{{!-- filters --}}
+	<div class="card-header filter">
+		<div class="mt-3 px-1">
+			<form class="row g-3">
+				<div class="col-12 col-sm-2">
+					<label for="rw" class="form-label">RW</label>
+					<select class="form-control select2" name="f.community_assoc_id" aria-label="Pilih RW" x-on:change="console.log('rw changed')">
+						<option value=""></option>
+						{{#each communityAssocs as |communityAssoc|}}
+							<option value="{{communityAssoc.id}}">{{communityAssoc.name}}</option>
+						{{/each}}
+					</select>
+				</div>
+				<div class="col-12 col-sm-2">
+					<label for="rt" class="form-label">RT</label>
+					<select class="form-control" name="f.resident_assoc_id" aria-label="Pilih RT">
+						<option value=""></option>
+					</select>
+				</div>
+				<div class="col-12 col-sm-4">
+					<label for="resident" class="form-label">Warga</label>
+					<input
+						type="text"
+						name="resident_name"
+						class="form-control"
+						placeholder="Nama Warga. Min: 3 char"
+						aria-label="warga"
+						x-model="filters.q">
+				</div>
+				<div class="col-auto d-flex align-items-end">
+					<button
+						class="btn btn-primary btn-search"
+						title="search"
+						x-bind:disabled="isFiltersEmpty"
+						x-on:click.prevent="applyFilters"
+					>
+						<i class="fas fa-search"></i>
+					</button>
+				</div>
+			</form>
+		</div>
+	</div>
 	<div class="card-body p-0">
+		{{!-- datatable --}}
 		<table class="table">
 			<thead>
 				<tr>
 					<th>Nama</th>
 					<th>Telepon</th>
 					<th>Alamat</th>
-					<th>Tgl. Terdaftar</th>
+					<th style="width: 220px;">Tgl. Terdaftar</th>
 					<th class="text-center" style="width: 60px"></th>
 				</tr>
 			</thead>
@@ -127,10 +186,34 @@
 </div>
 
 {{#content 'scripts'}}
+<script type="text/javascript" src="/plugins/select2/js/select2.full.min.js"></script>
 <script>
 	function initTableData() {
 		return {
+			filters: JSON.parse($('[name="init.filters"]').val()),
 			pagination: JSON.parse($('[name="init.pagination"]').val()),
+			get isFiltersEmpty() {
+				return !this.filters.communityAssocId && !this.filters.residentAssocId && !this.filters.q;
+			},
+			getFilterQueries() {
+				const qParams = new URLSearchParams();
+				if(this.filters.communityAssocId) {
+					qParams.append('f.cai', this.filters.communityAssocId);
+				}
+				if(this.filters.residentAssocId) {
+					qParams.append('f.rai', this.filters.residentAssocId);
+				}
+				if(this.filters.q) {
+					qParams.append('f.q', this.filters.q);
+				}
+				return qParams;
+			},
+			applyFilters() {
+				if (this.isFiltersEmpty) return;
+
+				const qParams = this.getFilterQueries();
+				window.location.href = '{{baseRoute}}?' + qParams.toString();
+			},
 			goToPrevPage() {
 				if (this.pagination.currentPage === 1) return;
 
@@ -155,10 +238,44 @@
 					})
 			},
 			init() {
+				const root = this;
+				
+				let initFResidentAssocId = root.filters.residentAssocId;
+
+				$('[name="f.community_assoc_id"]').select2({ placeholder: 'Pilih RW', allowClear: true });
+				$('[name="f.community_assoc_id"]').change(function () {
+					$('[name="f.resident_assoc_id"]').val('').trigger('change');
+					
+					const communityAssocId = $(this).val();
+
+					root.filters.communityAssocId = communityAssocId;
+
+					const defaultSelectedId = initFResidentAssocId;
+					const residentAssocsApiUrl = `/api/community-assocs/${communityAssocId}/resident-assocs`;
+					select2AjaxHandler('[name="f.resident_assoc_id"]', residentAssocsApiUrl, {
+						placeholder: 'Pilih RT',
+						allowClear: true,
+						defaultSelectedId,
+					});
+
+					initFResidentAssocId = null;
+				});
+
+				$('[name="f.resident_assoc_id"]').select2({ placeholder: 'Pilih RT', allowClear: true });
+				$('[name="f.resident_assoc_id"]').change(function () {
+					if ($(this).val()) {
+						root.filters.residentAssocId = $(this).val();
+					}
+				});
+
+				if (root.filters.communityAssocId) {
+					$('[name="f.community_assoc_id"]').val(root.filters.communityAssocId).trigger('change');
+				}
+
 				this.$watch('pagination', (value) => {
 					const { currentPage, perPage } = value;
 
-					const qParams = new URLSearchParams();
+					const qParams = new URLSearchParams(this.getFilterQueries());
 					qParams.append('pp', perPage);
 					qParams.append('p', currentPage);
 

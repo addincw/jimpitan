@@ -9,7 +9,8 @@
 		<link rel="stylesheet" href="/css/adminlte.min.css" />
 		<style>
 			.form-control.select2.is-invalid ~ .select2 > .selection >
-			.select2-selection { border-color: #dc3545;}
+			.select2-selection { border-color: #dc3545;} .content-wrapper { height:
+			max-content; }
 		</style>
 	</head>
 	<body class="sidebar-mini layout-fixed">
@@ -199,10 +200,11 @@
 		<script src="/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
 		<script src="/plugins/sweetalert2/sweetalert2.all.min.js"></script>
 		<script src="/js/adminlte.min.js"></script>
+		<script src="/js/admin.js"></script>
+		{{#block "scripts"}}{{/block}}
 		<script
 			defer
 			src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
 		></script>
-		{{#block "scripts"}}{{/block}}
 	</body>
 </html>
