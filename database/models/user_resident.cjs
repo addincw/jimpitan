@@ -8,7 +8,8 @@ module.exports = (sequelize, DataTypes) => {
 		 * The `models/index` file will call this method automatically.
 		 */
 		static associate(models) {
-			UserResident.belongsTo(models.User);
+			UserResident.belongsTo(models.User, { as: "user" });
+			UserResident.belongsTo(models.ResidentAssoc, { as: "resident_assoc" });
 			UserResident.hasMany(models.ResidentAssocDue);
 		}
 	}

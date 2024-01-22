@@ -10,6 +10,7 @@ import adminFilterAccess from "../middlewares/adminFilterAccess.mjs";
 import * as AuthController from "../controllers/AuthController.mjs";
 import * as CommunityAssocController from "../controllers/admin/residential/CommunityAssocController.mjs";
 import * as ResidentAssocController from "../controllers/admin/residential/ResidentAssocController.mjs";
+import * as ResidentController from "../controllers/admin/residential/ResidentController.mjs";
 import * as DashboardController from "../controllers/admin/DashboardController.mjs";
 import * as RoleController from "../controllers/admin/master/RoleController.mjs";
 
@@ -54,7 +55,6 @@ router.delete(
 router.use((_, res: Response, next) => {
 	res.locals.baseRoute = ResidentAssocController.baseRoute;
 	res.locals.baseRouteView = ResidentAssocController.baseRouteView;
-
 	next();
 });
 router.get("/residential/resident-assocs", ResidentAssocController.index);
@@ -69,6 +69,18 @@ router.delete(
 	"/residential/resident-assocs/:id",
 	ResidentAssocController.destroy
 );
+
+router.use((_, res: Response, next) => {
+	res.locals.baseRoute = ResidentController.baseRoute;
+	res.locals.baseRouteView = ResidentController.baseRouteView;
+	next();
+});
+router.get("/residential/residents", ResidentController.index);
+router.get("/residential/residents/create", ResidentController.create);
+router.post("/residential/residents", ResidentController.store);
+router.get("/residential/residents/:id", ResidentController.edit);
+router.put("/residential/residents/:id", ResidentController.update);
+router.delete("/residential/residents/:id", ResidentController.destroy);
 
 router.get("/master/roles", RoleController.index);
 

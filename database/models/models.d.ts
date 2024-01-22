@@ -39,6 +39,8 @@ export interface UserResidentAttributes {
 	user_id: number;
 	resident_assoc_id: number;
 	address: string;
+	createdAt: string;
+	updatedAt: string;
 }
 
 export interface UserFunctionaryAttributes {
