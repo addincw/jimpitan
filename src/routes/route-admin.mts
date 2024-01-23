@@ -9,10 +9,11 @@ import adminFilterAccess from "../middlewares/adminFilterAccess.mjs";
 
 import * as AuthController from "../controllers/AuthController.mjs";
 import * as CommunityAssocController from "../controllers/admin/residential/CommunityAssocController.mjs";
+import * as DashboardController from "../controllers/admin/DashboardController.mjs";
 import * as ResidentAssocController from "../controllers/admin/residential/ResidentAssocController.mjs";
 import * as ResidentController from "../controllers/admin/residential/ResidentController.mjs";
-import * as DashboardController from "../controllers/admin/DashboardController.mjs";
 import * as RoleController from "../controllers/admin/master/RoleController.mjs";
+import * as UserController from "../controllers/admin/master/UserController.mjs";
 
 passport.use(authLocalStrategy());
 passport.serializeUser(serializeUser);
@@ -83,5 +84,17 @@ router.put("/residential/residents/:id", ResidentController.update);
 router.delete("/residential/residents/:id", ResidentController.destroy);
 
 router.get("/master/roles", RoleController.index);
+
+router.use((_, res: Response, next) => {
+	res.locals.baseRoute = UserController.baseRoute;
+	res.locals.baseRouteView = UserController.baseRouteView;
+	next();
+});
+router.get("/master/users", UserController.index);
+router.get("/master/users/create", UserController.create);
+router.post("/master/users", UserController.store);
+router.get("/master/users/:id", UserController.edit);
+router.put("/master/users/:id", UserController.update);
+router.delete("/master/users/:id", UserController.destroy);
 
 export default router;

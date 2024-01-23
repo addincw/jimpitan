@@ -23,6 +23,7 @@ export interface ResidentAssocDueAttributes {
 }
 
 export interface RoleAttributes {
+	id: Identifier;
 	name: string;
 	slug: string;
 }
@@ -36,6 +37,8 @@ export interface UserAttributes {
 	role_id: number;
 	username: string;
 	password: string;
+	createdAt: string;
+	updatedAt: string;
 }
 
 export interface UserResidentAttributes {
