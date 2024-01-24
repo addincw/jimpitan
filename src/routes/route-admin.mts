@@ -10,6 +10,7 @@ import adminFilterAccess from "../middlewares/adminFilterAccess.mjs";
 import * as AuthController from "../controllers/AuthController.mjs";
 import * as CommunityAssocController from "../controllers/admin/residential/CommunityAssocController.mjs";
 import * as DashboardController from "../controllers/admin/DashboardController.mjs";
+import * as IncomeController from "../controllers/admin/dues/IncomeController.mjs";
 import * as ResidentAssocController from "../controllers/admin/residential/ResidentAssocController.mjs";
 import * as ResidentController from "../controllers/admin/residential/ResidentController.mjs";
 import * as RoleController from "../controllers/admin/master/RoleController.mjs";
@@ -96,5 +97,12 @@ router.post("/master/users", UserController.store);
 router.get("/master/users/:id", UserController.edit);
 router.put("/master/users/:id", UserController.update);
 router.delete("/master/users/:id", UserController.destroy);
+
+router.use((_, res: Response, next) => {
+	res.locals.baseRoute = IncomeController.baseRoute;
+	res.locals.baseRouteView = IncomeController.baseRouteView;
+	next();
+});
+router.get("/dues/income", IncomeController.index);
 
 export default router;

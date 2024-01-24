@@ -16,7 +16,10 @@ module.exports = (sequelize, DataTypes) => {
 				as: "resident_assoc",
 				foreignKey: "resident_assoc_id",
 			});
-			UserResident.hasMany(models.ResidentAssocDue);
+			UserResident.hasMany(models.ResidentAssocDue, {
+				as: "resident_assoc_dues",
+				foreignKey: "user_resident_id",
+			});
 		}
 	}
 	UserResident.init(
