@@ -383,13 +383,18 @@ export async function destroy(req: Request, res: Response) {
 	const dbTransaction = await sequelize.transaction();
 
 	try {
-		const data = await UserResident.findByPk(id, { include: ["user"] });
+		const data = await User.findByPk(id);
 
 		if (data) {
-			const user = ((data as typeof data) && { user: User }).user;
+			if (data.get("role_id") == 2) {
+				const userFunctionary = await UserFunctionary.findOne({
+					where: { user_id: data.get("id") as number },
+				});
+
+				if (userFunctionary) userFunctionary.destroy();
+			}
 
 			data.destroy();
-			user.destroy();
 		}
 
 		await dbTransaction.commit();
