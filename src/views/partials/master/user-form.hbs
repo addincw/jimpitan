@@ -5,6 +5,7 @@
 <input type="hidden" name="init.role_id" value="{{optional (lookup ./old 'role_id') (lookup ./formData 'role_id')}}">
 <input type="hidden" name="init.community_assoc_id" value="{{optional (lookup ./old 'community_assoc_id') (lookup ./formData 'community_assoc_id')}}">
 <input type="hidden" name="init.resident_assoc_id" value="{{optional (lookup ./old 'resident_assoc_id') (lookup ./formData 'resident_assoc_id')}}">
+<input type="hidden" name="init.req_change_password" value="{{optional (lookup ./old 'req_change_password') (lookup ./formData 'req_change_password')}}">
 
 <div x-data="initFormData()">
     <div class="form-group">
@@ -100,6 +101,23 @@
 
     <hr>
     <h5 class="mb-3">Hak Akses Pengguna</h5>
+    <template x-if="isEditUserForm">
+        <div class="form-check mb-3">
+            <input
+                type="checkbox"
+                class="form-check-input"
+                id="reqChangePassword"
+                name="req_change_password"
+                value="1"
+                x-on:click="reqChangePassword = !reqChangePassword;"
+            >
+            <label
+                class="form-check-label"
+                for="reqChangePassword"
+                x-text="isRoleFunctionary ? 'Request ubah PIN' : 'Ubah password'"
+            />
+        </div>
+    </template>
     <template x-if="!isRoleFunctionary">
         <div>
             <div class="form-group">
@@ -114,17 +132,19 @@
                 />
                 {{> form/invalid-feedback fieldName="username"}}
             </div>
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input
-                    class="form-control {{echoif (lookup errors.fieldErrors 'password') 'is-invalid'}}"
-                    id="password"
-                    name="password"
-                    type="password"
-                    value="{{optional (lookup ./old 'password') (lookup ./formData 'password')}}"
-                />
-                {{> form/invalid-feedback fieldName="password"}}
-            </div>
+            <template x-if="reqChangePassword">
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input
+                        class="form-control {{echoif (lookup errors.fieldErrors 'password') 'is-invalid'}}"
+                        id="password"
+                        name="password"
+                        type="password"
+                        value="{{optional (lookup ./old 'password') (lookup ./formData 'password')}}"
+                    />
+                    {{> form/invalid-feedback fieldName="password"}}
+                </div>
+            </template>
         </div>
     </template>
 
@@ -144,6 +164,8 @@
     <script>
         function initFormData() {
             return {
+                isEditUserForm: false,
+                reqChangePassword: false,
                 selectedRoleId: null,
                 get isRoleFunctionary() {
                     return this.selectedRoleId == 2;
@@ -162,19 +184,25 @@
                         $('[name="role_id"]').val(initRoleId).trigger('change');
                     }
 
-                    root.$watch('selectedRoleId', function (value) {
-                        if (value == 2) initResidentialFields();
-                    });
-
                     if (root.selectedRoleId == 2) {
                         setTimeout(initResidentialFields, 300);
                     }
+
+                    if ($('[name="id"]').val()) {
+                        root.isEditUserForm = true;
+                        if ($('[name="init.req_change_password"]').val()) {
+                            root.reqChangePassword = true;
+                        }
+                    }
+
+                    root.$watch('selectedRoleId', function (value) {
+                        if (value == 2) initResidentialFields();
+                    });
                 }
             }
         }
 
         function initResidentialFields() {
-            console.log('initialize residential fields')
             const initCommunityAssocId = $('[name=\"init.community_assoc_id\"]').val();
             let initResidentAssocId = $('[name=\"init.resident_assoc_id\"]').val();
 

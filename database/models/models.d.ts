@@ -39,6 +39,7 @@ export interface UserAttributes {
 	password: string;
 	createdAt: string;
 	updatedAt: string;
+	user_functionary: UserFunctionaryAttributes;
 }
 
 export interface UserResidentAttributes {
@@ -55,4 +56,5 @@ export interface UserResidentAttributes {
 export interface UserFunctionaryAttributes {
 	user_id: number;
 	resident_assoc_id: number;
+	resident_assoc: ResidentAssocAttributes;
 }

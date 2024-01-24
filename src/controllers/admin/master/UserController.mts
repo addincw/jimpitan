@@ -71,6 +71,54 @@ function buildWhereCondition(filters: {
 	return whereCondition;
 }
 
+function getAccessByRole(roleId: number, fields: Record<string, any>) {
+	let username = fields.username;
+	let password = fields.password;
+	if (roleId === 2) {
+		username = generateRandomString(4);
+		password = username;
+	}
+	return { username, password };
+}
+
+function validateByRole(roleId: number, fields: Record<string, any>) {
+	if (roleId === 1 && (!fields.username || !fields.password)) {
+		const errors = [];
+
+		if (!fields.username) {
+			errors.push({
+				code: "custom",
+				message: "username is required for administrator",
+				path: ["username"],
+			});
+		}
+		if (
+			!fields.password &&
+			(!fields.id || (fields.id && fields.req_change_password))
+		) {
+			errors.push({
+				code: "custom",
+				message: "password is required for administrator",
+				path: ["password"],
+			});
+		}
+
+		if (errors.length) {
+			throw new z.ZodError(errors);
+		}
+	}
+
+	if (roleId === 2 && !fields.resident_assoc_id) {
+		throw new z.ZodError([
+			{
+				code: "custom",
+				message: "RT is required for functionary",
+				path: ["resident_assoc_id"],
+			},
+		]);
+	}
+}
+
 export async function index(req: Request, res: Response, next: NextFunction) {
 	const filters = {
 		roleId: req.query["f.ri"] ? parseInt(req.query["f.ri"] as string) : 0,
@@ -176,38 +224,10 @@ export async function store(req: Request, res: Response) {
 			role_id: parseInt(req.body.role_id),
 		});
 
-		if (
-			validFormData.role_id === 1 &&
-			!req.body.username &&
-			!req.body.password
-		) {
-			throw new z.ZodError([
-				{
-					code: "custom",
-					message: "username and password is required for administrator",
-					path: ["username", "password"],
-				},
-			]);
-		}
-
-		if (validFormData.role_id === 2 && !req.body.resident_assoc_id) {
-			throw new z.ZodError([
-				{
-					code: "custom",
-					message: "RT is required for functionary",
-					path: ["resident_assoc_id"],
-				},
-			]);
-		}
+		validateByRole(validFormData.role_id, req.body);
 
 		const { firstname, lastname, phone, role_id } = validFormData;
-
-		let username = req.body.username;
-		let password = req.body.password;
-		if (role_id === 2) {
-			username = generateRandomString(4);
-			password = username;
-		}
+		const { username, password } = getAccessByRole(role_id, req.body);
 
 		const user = await User.create({
 			firstname,
@@ -247,32 +267,45 @@ export async function edit(req: Request, res: Response) {
 	const { id } = req.params;
 
 	const communityAssocs = await CommunityAssoc.findAll();
-	const data = await UserResident.findByPk(id, {
+	const roles = await Role.findAll({
+		where: { id: [1, 2] },
+	});
+
+	const data = await User.findByPk(id, {
 		include: [
-			"user",
+			"role",
 			{
-				model: ResidentAssoc,
-				as: "resident_assoc",
-				include: ["community_assoc"],
+				model: UserFunctionary,
+				as: "user_functionary",
+				required: false,
+				include: [
+					{
+						model: ResidentAssoc,
+						as: "resident_assoc",
+						include: ["community_assoc"],
+					},
+				],
 			},
 		],
 	});
 
-	const userResidentData = data.toJSON();
-	const fullname =
-		userResidentData.user.firstname + " " + userResidentData.user.lastname;
+	const user = data.toJSON();
+	const userFunctionary = user.user_functionary;
+	const fullname = user.firstname + " " + user.lastname;
 
 	res.render(baseRouteView + "/edit", {
-		title: "Edit Kepala Keluarga (KK): " + fullname,
+		title: "Edit Pengguna: " + fullname,
 		formData: {
-			id: userResidentData.id,
-			community_assoc_id: userResidentData.resident_assoc.community_assoc_id,
-			resident_assoc_id: userResidentData.resident_assoc_id,
-			firstname: userResidentData.user.firstname,
-			lastname: userResidentData.user.lastname,
-			address: userResidentData.address,
-			phone: userResidentData.user.phone,
+			id: user.id,
+			firstname: user.firstname,
+			lastname: user.lastname,
+			phone: user.phone,
+			role_id: user.role_id,
+			username: user.username,
+			community_assoc_id: userFunctionary?.resident_assoc?.community_assoc_id,
+			resident_assoc_id: userFunctionary?.resident_assoc_id,
 		},
+		roles: roles.map((row) => row.toJSON()),
 		communityAssocs: communityAssocs.map((row) => {
 			return row.toJSON();
 		}),
@@ -285,26 +318,44 @@ export async function update(req: Request, res: Response) {
 	const dbTransaction = await sequelize.transaction();
 
 	try {
-		const data = await UserResident.findByPk(id);
+		const data = await User.findByPk(id);
 
 		const validFormData = userFormSchema.parse({
 			...req.body,
 			role_id: parseInt(req.body.role_id),
 		});
 
-		const { firstname, lastname, phone, ...userResidentData } = validFormData;
-		const genUsername = firstname.toLowerCase() + generateRandomString(4);
-		const genPassword = hashMake(genUsername);
+		validateByRole(validFormData.role_id, req.body);
 
-		await data.update({ ...userResidentData });
+		const { firstname, lastname, phone, role_id } = validFormData;
+		const { username, password } = getAccessByRole(role_id, req.body);
 
-		(await User.findByPk(data.get("user_id") as Identifier)).update({
+		const dataWillUpdate: Record<string, any> = {
 			firstname,
 			lastname,
 			phone,
-			username: genUsername,
-			password: genPassword,
-		});
+			role_id,
+		};
+
+		if (role_id == 1) dataWillUpdate.username = username;
+
+		if (req.body.req_change_password) {
+			dataWillUpdate.password = hashMake(password);
+			if (role_id == 2) {
+				dataWillUpdate.username = username;
+			}
+		}
+
+		await data.update(dataWillUpdate);
+
+		if (role_id == 2) {
+			const userFunctionary = await UserFunctionary.findOne({
+				where: { user_id: data.get("id") as number },
+			});
+			userFunctionary.update({
+				resident_assoc_id: parseInt(req.body.resident_assoc_id),
+			});
+		}
 
 		await dbTransaction.commit();
 
