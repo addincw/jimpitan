@@ -5,6 +5,8 @@ import { UserAttributes } from "../../database/models/models";
 export default function adminFilterAccess(): RequestHandler {
 	const noAuthRoutes = ["/login"];
 
+	const publicRoutes = ["/", "/logout"];
+
 	const menuAccess = {
 		1: "^/(master|residential)/.*",
 		2: "^/dues/.*",
@@ -30,7 +32,8 @@ export default function adminFilterAccess(): RequestHandler {
 		const roleHasMenuAccess = new RegExp(menuAccess[user.role_id] ?? "").test(
 			req.url
 		);
-		if (req.url !== "/" && !roleHasMenuAccess) {
+
+		if (!publicRoutes.includes(req.url) && !roleHasMenuAccess) {
 			return res.redirect("back");
 		}
 
