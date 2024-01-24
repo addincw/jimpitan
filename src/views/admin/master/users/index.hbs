@@ -115,6 +115,7 @@
 					<th>Nama</th>
 					<th>Telepon</th>
 					<th>Role</th>
+					<th>PIN</th>
 					<th style="width: 220px;">Tgl. Terdaftar</th>
 					<th class="text-center" style="width: 60px"></th>
 				</tr>
@@ -132,6 +133,9 @@
 						</td>
 						<td>{{item.phone}}</td>
 						<td>{{item.role.name}}</td>
+						<td>
+							{{echoif item.user_functionary item.username}}
+						</td>
 						<td>{{item.createdAt}}</td>
 						<td>
 							<div class="dropdown">

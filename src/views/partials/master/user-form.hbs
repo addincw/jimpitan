@@ -1,0 +1,203 @@
+{{#content "styles"}}
+	<link rel="stylesheet" href="/plugins/select2/css/select2.min.css" />
+{{/content}}
+
+<input type="hidden" name="init.role_id" value="{{optional (lookup ./old 'role_id') (lookup ./formData 'role_id')}}">
+<input type="hidden" name="init.community_assoc_id" value="{{optional (lookup ./old 'community_assoc_id') (lookup ./formData 'community_assoc_id')}}">
+<input type="hidden" name="init.resident_assoc_id" value="{{optional (lookup ./old 'resident_assoc_id') (lookup ./formData 'resident_assoc_id')}}">
+
+<div x-data="initFormData()">
+    <div class="form-group">
+        <label>Role</label>
+        <select
+            class="form-control select2 {{echoif (lookup errors.fieldErrors 'role_id') 'is-invalid'}}"
+            name="role_id"
+        >
+            <option value=""></option>
+            {{#each roles as |role|}}
+                <option value="{{role.id}}">{{role.name}}</option>
+            {{/each}}
+        </select>
+        {{> form/invalid-feedback fieldName="role_id"}}
+    </div>
+
+    <hr>
+
+    <template x-if="isRoleFunctionary">
+        <div>
+            <h5 class="mb-3">Wilayah Tugas</h5>
+            <div class="form-group">
+                <label>Rukun Warga (RW)</label>
+                <select
+                    class="form-control select2 {{echoif (lookup errors.fieldErrors 'community_assoc_id') 'is-invalid'}}"
+                    name="community_assoc_id"
+                >
+                    <option value=""></option>
+                    {{#each communityAssocs as |communityAssoc|}}
+                        <option value="{{communityAssoc.id}}">{{communityAssoc.name}}</option>
+                    {{/each}}
+                </select>
+                {{> form/invalid-feedback fieldName="community_assoc_id"}}
+            </div>
+            <div class="form-group">
+                <label>Rukun Tetangga (RT)</label>
+                <select
+                    class="form-control select2 {{echoif (lookup errors.fieldErrors 'resident_assoc_id') 'is-invalid'}}"
+                    name="resident_assoc_id"
+                >
+                    <option value=""></option>
+                </select>
+                {{> form/invalid-feedback fieldName="resident_assoc_id"}}
+            </div>
+        </div>
+    </template>
+
+    <hr>
+
+    <h5 class="mb-3">Identitas Pengguna</h5>
+    <div class="row">
+        <div class="col-12 col-md-6">
+            <div class="form-group">
+                <label for="firstname">Nama Depan</label>
+                <input
+                    class="form-control {{echoif (lookup errors.fieldErrors 'firstname') 'is-invalid'}}"
+                    id="firstname"
+                    name="firstname"
+                    type="text"
+                    placeholder="Cth: Jhon"
+                    value="{{optional (lookup ./old 'firstname') (lookup ./formData 'firstname')}}"
+                />
+                {{> form/invalid-feedback fieldName="firstname"}}
+            </div>
+        </div>
+        <div class="col-12 col-md-6">
+            <div class="form-group">
+                <label for="lastname">Nama Belakang</label>
+                <input
+                    class="form-control {{echoif (lookup errors.fieldErrors 'lastname') 'is-invalid'}}"
+                    id="lastname"
+                    name="lastname"
+                    type="text"
+                    placeholder="Cth: Doe"
+                    value="{{optional (lookup ./old 'lastname') (lookup ./formData 'lastname')}}"
+                />
+                {{> form/invalid-feedback fieldName="lastname"}}
+            </div>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="phone">Telepon</label>
+        <input
+            class="form-control {{echoif (lookup errors.fieldErrors 'phone') 'is-invalid'}}"
+            id="phone"
+            name="phone"
+            type="text"
+            placeholder="Cth: 082100000000"
+            value="{{optional (lookup ./old 'phone') (lookup ./formData 'phone')}}"
+        />
+        {{> form/invalid-feedback fieldName="phone"}}
+    </div>
+
+    <hr>
+    <h5 class="mb-3">Hak Akses Pengguna</h5>
+    <template x-if="!isRoleFunctionary">
+        <div>
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input
+                    class="form-control {{echoif (lookup errors.fieldErrors 'username') 'is-invalid'}}"
+                    id="username"
+                    name="username"
+                    type="text"
+                    placeholder="Cth: jhondoe"
+                    value="{{optional (lookup ./old 'username') (lookup ./formData 'username')}}"
+                />
+                {{> form/invalid-feedback fieldName="username"}}
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input
+                    class="form-control {{echoif (lookup errors.fieldErrors 'password') 'is-invalid'}}"
+                    id="password"
+                    name="password"
+                    type="password"
+                    value="{{optional (lookup ./old 'password') (lookup ./formData 'password')}}"
+                />
+                {{> form/invalid-feedback fieldName="password"}}
+            </div>
+        </div>
+    </template>
+
+    <template x-if="isRoleFunctionary">
+        <div class="alert alert-info">
+            <h5 class="text-capitalize">
+                <i class="icon fas fa-info"></i>
+                Hak Akses Functionary Menggunakan PIN
+            </h5>
+            Role Funtionary (Kolektor Iuran) akan menggunakan <b>PIN</b> untuk login ke sistem. <b>PIN</b> akan tergenerate otomatis saat data pengguna dibuat, dapat dilihat pada menu <b>kelola pengguna > pengguna > cari pengguna terkait</b>.
+        </div>
+    </template>
+</div>
+
+{{#content "scripts"}}
+	<script type="text/javascript" src="/plugins/select2/js/select2.full.min.js"></script>
+    <script>
+        function initFormData() {
+            return {
+                selectedRoleId: null,
+                get isRoleFunctionary() {
+                    return this.selectedRoleId == 2;
+                },
+                init() {
+                    const root = this;
+
+                    $('[name="role_id"]').select2({ placeholder: 'Pilih Role', allowClear: true });
+                    $('[name="role_id"]').val(1).trigger('change');
+                    $('[name="role_id"]').change(function () {
+                        root.selectedRoleId = $(this).val();
+                    });
+
+                    const initRoleId = $('[name=\"init.role_id\"]').val();
+                    if (initRoleId) {
+                        $('[name="role_id"]').val(initRoleId).trigger('change');
+                    }
+
+                    root.$watch('selectedRoleId', function (value) {
+                        if (value == 2) initResidentialFields();
+                    });
+
+                    if (root.selectedRoleId == 2) {
+                        setTimeout(initResidentialFields, 300);
+                    }
+                }
+            }
+        }
+
+        function initResidentialFields() {
+            console.log('initialize residential fields')
+            const initCommunityAssocId = $('[name=\"init.community_assoc_id\"]').val();
+            let initResidentAssocId = $('[name=\"init.resident_assoc_id\"]').val();
+
+            $('[name="community_assoc_id"]').select2({ placeholder: "Pilih RW", allowClear: true });
+            $('[name="community_assoc_id"]').change(function () {
+                $('[name="resident_assoc_id"]').val('').trigger('change');
+                
+                const communityAssocId = $(this).val();
+                const residentAssocsApiUrl = `/api/community-assocs/${communityAssocId}/resident-assocs`;
+                select2AjaxHandler('[name="resident_assoc_id"]', residentAssocsApiUrl, {
+                    placeholder: 'Pilih RT',
+                    allowClear: true,
+                    defaultSelectedId: initResidentAssocId,
+                });
+
+                initResidentAssocId = null;
+            });
+
+            $('[name="resident_assoc_id"]').select2({ placeholder: 'Pilih RT', allowClear: true });
+    
+            if (initCommunityAssocId) {
+                $('[name="community_assoc_id"]').val(initCommunityAssocId).trigger('change');
+            }
+        }
+    </script>
+{{/content}}

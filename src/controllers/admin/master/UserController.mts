@@ -20,17 +20,16 @@ const {
 const baseRoute = "/admin/master/users";
 const baseRouteView = baseRoute.replace(new RegExp("^/"), "");
 
-const residentFormSchema = z.object({
+const userFormSchema = z.object({
 	firstname: z.string().min(3),
 	lastname: z.string(),
-	address: z.string().min(10),
 	phone: z
 		.string()
 		.min(12)
 		.refine((value) => /^[0-9]+$/.test(value), {
 			message: "Value must be a number",
 		}),
-	resident_assoc_id: z.number().min(1),
+	role_id: z.number().min(1),
 });
 
 export { baseRoute, baseRouteView };
@@ -155,9 +154,13 @@ export async function index(req: Request, res: Response, next: NextFunction) {
 
 export async function create(req: Request, res: Response) {
 	const communityAssocs = await CommunityAssoc.findAll();
+	const roles = await Role.findAll({
+		where: { id: [1, 2] },
+	});
 
 	res.render(baseRouteView + "/create", {
-		title: "Tambah Kepala Keluarga (KK)",
+		title: "Tambah Pengguna",
+		roles: roles.map((row) => row.toJSON()),
 		communityAssocs: communityAssocs.map((row) => {
 			return row.toJSON();
 		}),
@@ -168,29 +171,59 @@ export async function store(req: Request, res: Response) {
 	const dbTransaction = await sequelize.transaction();
 
 	try {
-		const validFormData = residentFormSchema.parse({
+		const validFormData = userFormSchema.parse({
 			...req.body,
-			user_id: parseInt(req.body.user_id),
-			resident_assoc_id: parseInt(req.body.resident_assoc_id),
+			role_id: parseInt(req.body.role_id),
 		});
 
-		const { firstname, lastname, phone, ...userResidentData } = validFormData;
-		const genUsername = firstname.toLowerCase() + generateRandomString(4);
-		const genPassword = hashMake(genUsername);
+		if (
+			validFormData.role_id === 1 &&
+			!req.body.username &&
+			!req.body.password
+		) {
+			throw new z.ZodError([
+				{
+					code: "custom",
+					message: "username and password is required for administrator",
+					path: ["username", "password"],
+				},
+			]);
+		}
+
+		if (validFormData.role_id === 2 && !req.body.resident_assoc_id) {
+			throw new z.ZodError([
+				{
+					code: "custom",
+					message: "RT is required for functionary",
+					path: ["resident_assoc_id"],
+				},
+			]);
+		}
+
+		const { firstname, lastname, phone, role_id } = validFormData;
+
+		let username = req.body.username;
+		let password = req.body.password;
+		if (role_id === 2) {
+			username = generateRandomString(4);
+			password = username;
+		}
 
 		const user = await User.create({
 			firstname,
 			lastname,
 			phone,
-			username: genUsername,
-			password: genPassword,
-			role_id: 3, // resident = 3
+			username,
+			password: hashMake(password),
+			role_id,
 		});
 
-		await UserResident.create({
-			...userResidentData,
-			user_id: user.get("id") as number,
-		});
+		if (role_id === 2) {
+			await UserFunctionary.create({
+				resident_assoc_id: parseInt(req.body.resident_assoc_id),
+				user_id: user.get("id") as number,
+			});
+		}
 
 		await dbTransaction.commit();
 
@@ -254,10 +287,9 @@ export async function update(req: Request, res: Response) {
 	try {
 		const data = await UserResident.findByPk(id);
 
-		const validFormData = residentFormSchema.parse({
+		const validFormData = userFormSchema.parse({
 			...req.body,
-			user_id: parseInt(req.body.user_id),
-			resident_assoc_id: parseInt(req.body.resident_assoc_id),
+			role_id: parseInt(req.body.role_id),
 		});
 
 		const { firstname, lastname, phone, ...userResidentData } = validFormData;
