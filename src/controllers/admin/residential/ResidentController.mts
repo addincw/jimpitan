@@ -1,5 +1,5 @@
 import { Identifier, Op } from "sequelize";
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { z } from "zod";
 import moment from "moment";
 
@@ -58,7 +58,7 @@ function buildWhereCondition(filters: {
 	return whereCondition;
 }
 
-export async function index(req: Request, res: Response) {
+export async function index(req: Request, res: Response, next: NextFunction) {
 	const filters = {
 		communityAssocId: req.query["f.cai"]
 			? parseInt(req.query["f.cai"] as string)
@@ -76,51 +76,55 @@ export async function index(req: Request, res: Response) {
 
 	const offset = (page - 1) * perPage;
 
-	const data = await UserResident.findAndCountAll({
-		where: buildWhereCondition(filters),
-		include: [
-			"user",
-			{
-				model: ResidentAssoc,
-				as: "resident_assoc",
-				include: ["community_assoc"],
-			},
-		],
-		order: [["created_at", "DESC"]],
-		limit: perPage,
-		offset,
-	});
-
-	const totalPages = Math.ceil(data.count / perPage);
-	const currentPage = page;
-
-	const communityAssocs = await CommunityAssoc.findAll();
-
-	res.render(baseRouteView + "/index", {
-		title: "Kepala Keluarga (KK)",
-		communityAssocs: communityAssocs.map((row) => {
-			return row.toJSON();
-		}),
-		data: data.rows.map((row) => {
-			const flattenRow = row.toJSON();
-			return {
-				...flattenRow,
-				createdAt: moment(flattenRow.createdAt).format("DD, MMM YYYY. HH:MM"),
-				updatedAt: moment(flattenRow.updatedAt).format("DD, MMM YYYY. HH:MM"),
-			};
-		}),
-		perPageOpts,
-		pagination: {
-			currentPage,
-			totalPages,
-			perPage,
+	try {
+		const data = await UserResident.findAndCountAll({
+			where: buildWhereCondition(filters),
+			include: [
+				"user",
+				{
+					model: ResidentAssoc,
+					as: "resident_assoc",
+					include: ["community_assoc"],
+				},
+			],
+			order: [["created_at", "DESC"]],
+			limit: perPage,
 			offset,
-			showFrom: currentPage * perPage - (perPage - 1),
-			showTo: (currentPage - 1) * perPage + data.rows.length,
-			totalCount: data.count,
-		},
-		filters,
-	});
+		});
+
+		const totalPages = Math.ceil(data.count / perPage);
+		const currentPage = page;
+
+		const communityAssocs = await CommunityAssoc.findAll();
+
+		res.render(baseRouteView + "/index", {
+			title: "Kepala Keluarga (KK)",
+			communityAssocs: communityAssocs.map((row) => {
+				return row.toJSON();
+			}),
+			data: data.rows.map((row) => {
+				const flattenRow = row.toJSON();
+				return {
+					...flattenRow,
+					createdAt: moment(flattenRow.createdAt).format("DD, MMM YYYY. HH:MM"),
+					updatedAt: moment(flattenRow.updatedAt).format("DD, MMM YYYY. HH:MM"),
+				};
+			}),
+			perPageOpts,
+			pagination: {
+				currentPage,
+				totalPages,
+				perPage,
+				offset,
+				showFrom: currentPage * perPage - (perPage - 1),
+				showTo: (currentPage - 1) * perPage + data.rows.length,
+				totalCount: data.count,
+			},
+			filters,
+		});
+	} catch (error) {
+		next(error);
+	}
 }
 
 export async function create(req: Request, res: Response) {

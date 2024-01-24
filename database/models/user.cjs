@@ -13,7 +13,10 @@ module.exports = (sequelize, DataTypes) => {
 				as: "user_functionary",
 				foreignKey: "user_id",
 			});
-			User.hasOne(models.UserResident, { as: "user_resident" });
+			User.hasOne(models.UserResident, {
+				as: "user_resident",
+				foreignKey: "user_id",
+			});
 		}
 	}
 	User.init(
