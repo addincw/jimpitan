@@ -24,7 +24,10 @@ module.exports = (sequelize, DataTypes) => {
 			amount: DataTypes.INTEGER,
 			type: DataTypes.INTEGER,
 			resident_assoc_id: DataTypes.INTEGER,
-			user_resident_id: DataTypes.INTEGER,
+			user_resident_id: {
+				type: DataTypes.INTEGER,
+				allowNull: true,
+			},
 			user_functionary_id: DataTypes.INTEGER,
 			date: DataTypes.DATE,
 		},

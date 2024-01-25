@@ -1,0 +1,80 @@
+{{#content "styles"}}
+	<link rel="stylesheet" href="/plugins/select2/css/select2.min.css" />
+{{/content}}
+
+<input type="hidden" name="init.user_resident_id" value="{{optional (lookup ./old 'user_resident_id') (lookup ./formData 'user_resident_id')}}">
+
+<div class="form-group">
+    <label for="description">Deskripsi Pengeluaran</label>
+    <textarea
+        class="form-control {{echoif (lookup errors.fieldErrors "description") "is-invalid"}}"
+        id="description"
+        name="description"
+        placeholder="Cth: Snack Ronda"
+    >{{optional (lookup ./old 'description') (lookup ./formData 'description')}}</textarea>
+    {{> form/invalid-feedback fieldName="description"}}
+</div>
+<div class="form-group">
+    <label for="amount">Jumlah Pengeluaran</label>
+    <div class="input-group">
+        <div class="input-group-prepend">
+            <span class="input-group-text">Rp</span>
+        </div>
+        <input
+            class="form-control {{echoif (lookup errors.fieldErrors "amount") "is-invalid"}}"
+            id="amount"
+            name="amount"
+            type="number"
+            placeholder="Cth: 5000"
+            value="{{optional (lookup ./old 'amount') (lookup ./formData 'amount')}}"
+        />
+    </div>
+    {{> form/invalid-feedback fieldName="amount"}}
+</div>
+<div class="form-group">
+    <label>Penerima (*optional apabila pengeluaran untuk penyaluran dana)</label>
+    <select
+        class="form-control select2 {{echoif (lookup errors.fieldErrors 'user_resident_id') 'is-invalid'}}"
+        name="user_resident_id"
+    >
+        <option value=""></option>
+        {{#each userResidents as |userResident|}}
+            <option value="{{userResident.user_resident.id}}">{{userResident.firstname}} {{userResident.lastname}}</option>
+        {{/each}}
+    </select>
+    {{> form/invalid-feedback fieldName="user_resident_id"}}
+</div>
+<div class="form-group">
+    <label for="amount">Tgl Pengeluaran</label>
+    <div class="input-group">
+        <div class="input-group-prepend">
+            <span class="input-group-text">
+                <i class="fas fa-calendar"></i>
+            </span>
+        </div>
+        <input
+            class="form-control {{echoif (lookup errors.fieldErrors "date") "is-invalid"}}"
+            id="date"
+            name="date"
+            type="date"
+            placeholder="Cth: 5000"
+            value="{{optional (lookup ./old 'date') (lookup ./formData 'date')}}"
+        />
+    </div>
+    {{> form/invalid-feedback fieldName="date"}}
+</div>
+
+{{#content "scripts"}}
+	<script type="text/javascript" src="/plugins/select2/js/select2.full.min.js"></script>
+    <script>
+        const userResidentSelection = $('.select2').select2({
+            placeholder: "Pilih Penerima",
+            allowClear: true,
+        });
+        
+        const userResidentId = $('[name=\"init.user_resident_id\"]').val();
+        if (userResidentId) {
+            userResidentSelection.val(userResidentId).trigger('change');
+        }
+    </script>
+{{/content}}

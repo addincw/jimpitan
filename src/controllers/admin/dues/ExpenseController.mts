@@ -22,15 +22,9 @@ const baseRoute = "/admin/dues/expense";
 const baseRouteView = baseRoute.replace(new RegExp("^/"), "");
 
 const expenseFormSchema = z.object({
-	firstname: z.string().min(3),
-	lastname: z.string(),
-	phone: z
-		.string()
-		.min(12)
-		.refine((value) => /^[0-9]+$/.test(value), {
-			message: "Value must be a number",
-		}),
-	role_id: z.number().min(1),
+	description: z.string().min(3),
+	amount: z.number().gte(500),
+	date: z.string().length(10),
 });
 
 export { baseRoute, baseRouteView };
@@ -118,17 +112,8 @@ export async function index(req: Request, res: Response, next: NextFunction) {
 		const totalPages = Math.ceil(data.count / perPage);
 		const currentPage = page;
 
-		const communityAssocs = await CommunityAssoc.findAll();
-		const roles = await Role.findAll({
-			where: { id: [1, 2] },
-		});
-
 		res.render(baseRouteView + "/index", {
 			title: "Pengeluaran Iuran",
-			roles: roles.map((row) => row.toJSON()),
-			communityAssocs: communityAssocs.map((row) => {
-				return row.toJSON();
-			}),
 			data: data.rows.map((row) => {
 				const flattenRow = row.toJSON();
 				return {
@@ -159,57 +144,46 @@ export async function index(req: Request, res: Response, next: NextFunction) {
 }
 
 export async function create(req: Request, res: Response) {
-	const communityAssocs = await CommunityAssoc.findAll();
-	const roles = await Role.findAll({
-		where: { id: [1, 2] },
+	const userFunctionary = await getUserFunctionaryLoggedIn(req.user);
+
+	const userResidents = await User.findAll({
+		where: {
+			role_id: 3,
+			"$user_resident.resident_assoc_id$": userFunctionary.resident_assoc_id,
+		},
+		include: ["user_resident"],
 	});
 
 	res.render(baseRouteView + "/create", {
 		title: "Catat Pengeluaran",
-		roles: roles.map((row) => row.toJSON()),
-		communityAssocs: communityAssocs.map((row) => {
-			return row.toJSON();
-		}),
+		userResidents: userResidents.map((user) => user.toJSON()),
 	});
 }
 
 export async function store(req: Request, res: Response) {
-	const dbTransaction = await sequelize.transaction();
-
 	try {
 		const validFormData = expenseFormSchema.parse({
 			...req.body,
-			role_id: parseInt(req.body.role_id),
+			amount: parseInt(req.body.amount),
 		});
+		const userResidentId =
+			req.body.user_resident_id !== ""
+				? parseInt(req.body.user_resident_id)
+				: null;
 
-		validateByRole(validFormData.role_id, req.body);
+		const userFunctionary = await getUserFunctionaryLoggedIn(req.user);
 
-		const { firstname, lastname, phone, role_id } = validFormData;
-		const { username, password } = getAccessByRole(role_id, req.body);
-
-		const user = await User.create({
-			firstname,
-			lastname,
-			phone,
-			username,
-			password: hashMake(password),
-			role_id,
+		await ResidentAssocDue.create({
+			...validFormData,
+			resident_assoc_id: userFunctionary.resident_assoc_id,
+			user_functionary_id: userFunctionary.id,
+			user_resident_id: userResidentId,
+			type: 1,
 		});
-
-		if (role_id === 2) {
-			await UserFunctionary.create({
-				resident_assoc_id: parseInt(req.body.resident_assoc_id),
-				user_id: user.get("id") as number,
-			});
-		}
-
-		await dbTransaction.commit();
 
 		req.flash("success", "data berhasil tersimpan");
 		res.redirect(baseRoute + "/");
 	} catch (error) {
-		await dbTransaction.rollback();
-
 		if (error instanceof z.ZodError) {
 			req.flash("error", `gagal menyimpan data, periksa ulang form`);
 			req.flash("errorPayload", JSON.stringify(error.flatten()));
@@ -278,15 +252,7 @@ export async function update(req: Request, res: Response) {
 	try {
 		const data = await User.findByPk(id);
 
-		const validFormData = expenseFormSchema.parse({
-			...req.body,
-			role_id: parseInt(req.body.role_id),
-		});
-
-		validateByRole(validFormData.role_id, req.body);
-
-		const { firstname, lastname, phone, role_id } = validFormData;
-		const { username, password } = getAccessByRole(role_id, req.body);
+		const validFormData = expenseFormSchema.parse(req.body);
 
 		const dataWillUpdate: Record<string, any> = {
 			firstname,
