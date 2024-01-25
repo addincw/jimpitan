@@ -291,29 +291,13 @@ export async function update(req: Request, res: Response) {
 export async function destroy(req: Request, res: Response) {
 	const { id } = req.params;
 
-	const dbTransaction = await sequelize.transaction();
-
 	try {
-		const data = await User.findByPk(id);
+		const data = await ResidentAssocDue.findByPk(id);
 
-		if (data) {
-			if (data.get("role_id") == 2) {
-				const userFunctionary = await UserFunctionary.findOne({
-					where: { user_id: data.get("id") as number },
-				});
-
-				if (userFunctionary) userFunctionary.destroy();
-			}
-
-			data.destroy();
-		}
-
-		await dbTransaction.commit();
+		if (data) data.destroy();
 
 		req.flash("success", "data berhasil dihapus");
 	} catch (error) {
-		await dbTransaction.rollback();
-
 		req.flash("error", `gagal menghapus data: ${error.message}`);
 	}
 
