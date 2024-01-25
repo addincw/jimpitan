@@ -104,5 +104,6 @@ router.use((_, res: Response, next) => {
 	next();
 });
 router.get("/dues/income", IncomeController.index);
+router.put("/dues/income/:id", IncomeController.store);
 
 export default router;

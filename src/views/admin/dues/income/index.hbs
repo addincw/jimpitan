@@ -107,19 +107,23 @@
 						</td>
 						<td>{{item.collectAt}}</td>
 						<td>
-							<button
-								class="btn btn-success"
-								type="button"
-								title="terima iuran"
-								x-on:click="() => confirmCollect({{stringify item}})"
-							>
-								<i class="fas fa-check mr-1"></i>
-								Terima
-							</button>
-							<form id="form-collect-{{item.id}}" class="d-none m-0" action="{{../baseRoute}}/{{item.id}}" method="post">
-								{{{method 'PUT'}}}
-								<button type="submit"></button>
-							</form>
+							{{#if (eq item.resident_assoc_dues.length 0)}}
+								<button
+									class="btn btn-success"
+									type="button"
+									title="terima iuran"
+									x-on:click="() => confirmCollect({{stringify item}})"
+								>
+									<i class="fas fa-check mr-1"></i>
+									Terima
+								</button>
+								<form id="form-collect-{{item.id}}" class="d-none m-0" action="{{../baseRoute}}/{{item.id}}" method="post">
+									{{{method 'PUT'}}}
+									<button type="submit"></button>
+								</form>
+							{{else}}
+								<p class="text-success">Rp.500</p>
+							{{/if}}
 						</td>
 					</tr>
 				{{/each}}
@@ -220,7 +224,7 @@
 				})
 					.then((result) => {
 						if (result.isConfirmed) {
-							document.getElementById(`form-collect-${id}`).submit();
+							document.getElementById(`form-collect-${resident.id}`).submit();
 						}
 					})
 			},

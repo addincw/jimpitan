@@ -18,6 +18,19 @@ const baseRouteView = baseRoute.replace(new RegExp("^/"), "");
 
 export { baseRoute, baseRouteView };
 
+async function getUserFunctionaryLoggedIn(userLoggedIn: Record<string, any>) {
+	const userFunctionary = await UserFunctionary.findOne({
+		where: { user_id: (userLoggedIn as UserAttributes).id },
+		include: [
+			{
+				model: ResidentAssoc,
+				as: "resident_assoc",
+				include: ["community_assoc"],
+			},
+		],
+	});
+	return userFunctionary.toJSON();
+}
 function genWhereByFilters(query: Record<string, any>) {
 	const q = query["f.q"] ? (query["f.q"] as string) : "";
 	const status = query["f.status"] ? (query["f.status"] as string) : "";
@@ -40,19 +53,7 @@ function genWhereByFilters(query: Record<string, any>) {
 }
 
 export async function index(req: Request, res: Response, next: NextFunction) {
-	const user = req.user as UserAttributes; // logged in user
-
-	const userFunctionaryModel = await UserFunctionary.findOne({
-		where: { user_id: user.id },
-		include: [
-			{
-				model: ResidentAssoc,
-				as: "resident_assoc",
-				include: ["community_assoc"],
-			},
-		],
-	});
-	const userFunctionary = userFunctionaryModel.toJSON();
+	const userFunctionary = await getUserFunctionaryLoggedIn(req.user);
 
 	const residentAssoc = userFunctionary.resident_assoc;
 	const communityAssoc = userFunctionary.resident_assoc.community_assoc;
@@ -67,6 +68,7 @@ export async function index(req: Request, res: Response, next: NextFunction) {
 	const offset = (page - 1) * perPage;
 
 	try {
+		// TODO: timezone client (+7) and server different, need some adjustment for querying data
 		const data = await UserResident.findAndCountAll({
 			subQuery: false,
 			where: {
@@ -109,7 +111,7 @@ export async function index(req: Request, res: Response, next: NextFunction) {
 				const flattenRow = row.toJSON();
 				return {
 					...flattenRow,
-					collectAt: moment().format("DD, MMM YYYY. HH:MM"),
+					collectAt: moment().format("DD, MMM YYYY"),
 					createdAt: moment(flattenRow.createdAt).format("DD, MMM YYYY. HH:MM"),
 					updatedAt: moment(flattenRow.updatedAt).format("DD, MMM YYYY. HH:MM"),
 				};
@@ -128,5 +130,51 @@ export async function index(req: Request, res: Response, next: NextFunction) {
 		});
 	} catch (error) {
 		next(error);
+	}
+}
+
+export async function store(req: Request, res: Response) {
+	const { id } = req.params;
+
+	const userFunctionary = await getUserFunctionaryLoggedIn(req.user);
+
+	try {
+		const todayDues = await ResidentAssocDue.findOne({
+			where: {
+				resident_assoc_id: userFunctionary.resident_assoc_id,
+				user_resident_id: id,
+				date: {
+					[Op.and]: [
+						Sequelize.literal(
+							`DATE(date) = '${moment().format("YYYY-MM-DD")}'`
+						),
+					],
+				},
+			},
+			raw: true,
+		});
+
+		if (!todayDues) {
+			const date = moment().format("YYYY-MM-DD HH:mm:ss");
+
+			// TODO: timezone client (+7) and server different, need some adjustment for storing data
+			const dueCreated = await ResidentAssocDue.create({
+				resident_assoc_id: userFunctionary.resident_assoc_id,
+				user_resident_id: parseInt(id),
+				user_functionary_id: userFunctionary.id,
+				amount: 500,
+				description: "iuran jimpitan",
+				type: 0, // in,
+				date: moment().format("YYYY-MM-DD HH:mm:ss"),
+			});
+
+			console.log("due time", date, dueCreated.get("date"));
+		}
+
+		req.flash("success", "data berhasil tersimpan");
+		res.redirect(baseRoute + "/");
+	} catch (error) {
+		req.flash("error", `gagal menyimpan data: ${error.message}`);
+		res.redirect(baseRoute + "/");
 	}
 }

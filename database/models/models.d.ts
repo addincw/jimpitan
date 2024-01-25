@@ -55,6 +55,7 @@ export interface UserResidentAttributes {
 }
 
 export interface UserFunctionaryAttributes {
+	id: number;
 	user_id: number;
 	resident_assoc_id: number;
 	resident_assoc: ResidentAssocAttributes;
