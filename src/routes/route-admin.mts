@@ -11,6 +11,7 @@ import * as AuthController from "../controllers/AuthController.mjs";
 import * as CommunityAssocController from "../controllers/admin/residential/CommunityAssocController.mjs";
 import * as DashboardController from "../controllers/admin/DashboardController.mjs";
 import * as IncomeController from "../controllers/admin/dues/IncomeController.mjs";
+import * as ExpenseController from "../controllers/admin/dues/ExpenseController.mjs";
 import * as ResidentAssocController from "../controllers/admin/residential/ResidentAssocController.mjs";
 import * as ResidentController from "../controllers/admin/residential/ResidentController.mjs";
 import * as RoleController from "../controllers/admin/master/RoleController.mjs";
@@ -105,5 +106,17 @@ router.use((_, res: Response, next) => {
 });
 router.get("/dues/income", IncomeController.index);
 router.put("/dues/income/:id", IncomeController.store);
+
+router.use((_, res: Response, next) => {
+	res.locals.baseRoute = ExpenseController.baseRoute;
+	res.locals.baseRouteView = ExpenseController.baseRouteView;
+	next();
+});
+router.get("/dues/expense", ExpenseController.index);
+router.get("/dues/expense/create", ExpenseController.create);
+router.post("/dues/expense", ExpenseController.store);
+router.get("/dues/expense/:id", ExpenseController.edit);
+router.put("/dues/expense/:id", ExpenseController.update);
+router.delete("/dues/expense/:id", ExpenseController.destroy);
 
 export default router;

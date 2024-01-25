@@ -21,6 +21,8 @@ export interface ResidentAssocDueAttributes {
 	user_resident_id: number;
 	user_functionary_id: number;
 	date: string;
+	createdAt: string;
+	updatedAt: string;
 }
 
 export interface RoleAttributes {

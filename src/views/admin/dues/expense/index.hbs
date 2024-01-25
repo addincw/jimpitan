@@ -1,0 +1,257 @@
+{{#content 'styles'}}
+<link rel="stylesheet" href="/plugins/select2/css/select2.min.css" />
+<style>
+	.card-header.filter {
+		background-color: rgba(0,0,0,.03);
+	}
+	.card-header.filter .btn-search {
+		padding-top: 0.6rem;
+		padding-bottom: 0.6rem;
+	}
+</style>
+{{/content}}
+
+<input type="hidden" name="init.filters" value="{{stringify filters}}">
+<input type="hidden" name="init.pagination" value="{{stringify pagination}}">
+
+<div class="card" x-data="initTableData()">
+	<div class="card-header">
+		<div
+			class="card-title row g-3 align-items-center"
+			style="font-size: medium;"
+		>
+			<div class="col-auto">
+				<label for="per_page" class="col-form-label">Show</label>
+			</div>
+			<div class="col-auto">
+				<select
+					class="form-control"
+					name="per_page"
+					aria-label="Data per halaman"
+					x-on:change="pagination.perPage = $event.target.value; pagination.currentPage = 1;"
+				>
+				{{#each perPageOpts as |opt|}}
+					<option value="{{opt}}" {{{echoif (eq opt ../pagination.perPage) 'selected=""'}}}>
+						{{opt}}
+					</option>
+				{{/each}}
+				</select>
+			</div>
+			<div class="col-auto">
+				<span class="form-text">Entries</span>
+			</div>
+		</div>
+		<div class="card-tools">
+			<a class="btn btn-primary" href="{{baseRoute}}/create">
+				<i class="fas fa-plus me-1"></i>
+				Catat Pengeluaran
+			</a>
+		</div>
+	</div>
+	{{!-- filters --}}
+	<div class="card-header filter">
+		<div class="mt-3 px-1">
+			<form class="row g-3">
+				<div class="col-12 col-sm-4">
+					<label for="resident" class="form-label">Deskripsi</label>
+					<input
+						type="text"
+						name="description"
+						class="form-control"
+						placeholder="Deskripsi pengeluaran. Min: 3 char"
+						aria-label="warga"
+						x-model="filters.q">
+				</div>
+				<div class="col-auto d-flex align-items-end">
+					<button
+						class="btn btn-primary btn-search mr-2"
+						title="search with filters"
+						x-bind:disabled="isFiltersEmpty"
+						x-on:click.prevent="applyFilters"
+					>
+						<i class="fas fa-search"></i>
+					</button>
+					<button
+						class="btn btn-outline-secondary"
+						title="clear filters"
+						x-on:click.prevent="clearFilters"
+					>
+						<i class="fas fa-times mr-1"></i>
+						Clear filter
+					</button>
+				</div>
+			</form>
+		</div>
+	</div>
+	<div class="card-body p-0">
+		{{!-- datatable --}}
+		<table class="table">
+			<thead>
+				<tr>
+					<th>Deskripsi</th>
+					<th>Jumlah</th>
+					<th>Penerima</th>
+					<th style="width: 220px;">Tgl. Pengeluaran</th>
+					<th>Dicatat Oleh</th>
+					<th class="text-center" style="width: 60px"></th>
+				</tr>
+			</thead>
+			<tbody>
+				{{#each data as |item|}}
+					<tr>
+						<td>
+							{{item.description}}
+						</td>
+						<td>Rp.{{item.amount}}</td>
+						<td>
+							{{#if item.user_resident_id}}
+								<div class="text-truncate">
+									{{item.user_resident.user.firstname}} {{item.user_resident.user.lastname}}
+								</div>
+								{{lookup item.user_resident.resident_assoc 'name'}}, {{lookup item.user_resident.resident_assoc.community_assoc 'name'}}
+							{{/if}}
+						</td>
+						<td>{{item.date}}</td>
+						<td>
+							{{item.user_functionary.user.firstname}} {{item.user_functionary.user.lastname}}
+						</td>
+						<td>
+							<div class="dropdown">
+								<button
+									class="btn btn-outline-dark dropdown-toggle {{echoif (eq item.username 'administrator') 'disabled'}}"
+									type="button"
+									id="btn-role-opt"
+									data-toggle="dropdown"
+									aria-expanded="false"
+								>
+									<i class="fas fa-cog"></i>
+								</button>
+								<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="btn-role-opt">
+									<li>
+										<a class="dropdown-item" href="{{../baseRoute}}/{{item.id}}">Edit</a>
+									</li>
+									<li>
+										<a class="dropdown-item" type="button" x-on:click="() => confirmDelete({{item.id}})">Hapus</a>
+										<form id="form-delete-{{item.id}}" class="d-none m-0" action="{{../baseRoute}}/{{item.id}}" method="post">
+											{{{method 'DELETE'}}}
+											<button type="submit"></button>
+										</form>
+									</li>
+								</ul>
+							</div>
+						</td>
+					</tr>
+				{{/each}}
+			</tbody>
+		</table>
+	</div>
+	<div class="card-footer clearfix">
+		<div
+			class="d-flex flex-column flex-md-row align-items-center justify-content-between"
+		>
+			<p class="m-0">Showing
+				{{pagination.showFrom}}
+				to {{pagination.showTo}} of
+				{{pagination.totalCount}}
+				entries</p>
+			<ul class="pagination m-0">
+				<li class="page-item {{echoif (eq pagination.currentPage 1) 'disabled'}}">
+					<a
+						class="page-link"
+						href="#"
+						x-on:click.prevent="goToPrevPage"
+						{{{echoif (eq pagination.currentPage 1) 'tabindex="-1" aria-disabled="true"'}}}
+					>
+						«
+					</a>
+				</li>
+				{{#for 1 (increment pagination.totalPages 1)}}
+					<li class="page-item{{#if (eq ../pagination.currentPage this)}} active {{/if}}">
+						<a class="page-link" href="#" x-on:click.prevent="pagination.currentPage = {{this}};">{{this}}</a>
+					</li>
+				{{/for}}
+				<li class="page-item {{echoif (eq pagination.currentPage pagination.totalPages) 'disabled'}}">
+					<a
+						class="page-link"
+						href="#"
+						{{{echoif (eq pagination.currentPage 1) 'tabindex="-1" aria-disabled="true"'}}}
+						x-on:click.prevent="goToNextPage"
+					>
+						»
+					</a>
+				</li>
+			</ul>
+		</div>
+	</div>
+</div>
+
+{{#content 'scripts'}}
+<script type="text/javascript" src="/plugins/select2/js/select2.full.min.js"></script>
+<script>
+	function initTableData() {
+		return {
+			filters: JSON.parse($('[name="init.filters"]').val()),
+			pagination: JSON.parse($('[name="init.pagination"]').val()),
+			get isFiltersEmpty() {
+				let isEmpty = true;
+				Object.keys(this.filters).forEach((filter) => {
+					if (this.filters[filter]) {
+						isEmpty = false;
+					}
+				});
+				return isEmpty;
+			},
+			getFilterQueries() {
+				const qParams = new URLSearchParams();
+				if(this.filters.q) {
+					qParams.append('f.q', this.filters.q);
+				}
+				return qParams;
+			},
+			applyFilters() {
+				if (this.isFiltersEmpty) return;
+
+				const qParams = this.getFilterQueries();
+				window.location.href = '{{baseRoute}}?' + qParams.toString();
+			},
+			clearFilters() {
+				window.location.href = '{{baseRoute}}';
+			},
+			goToPrevPage() {
+				if (this.pagination.currentPage === 1) return;
+
+				this.pagination.currentPage -= 1;
+			},
+			goToNextPage() {
+				if (this.pagination.currentPage === this.pagination.totalPage) return;
+
+				this.pagination.currentPage += 1;
+			},
+			confirmDelete(id) {
+				Swal.fire({
+					showCancelButton: true,
+					title: 'Yakin untuk menghapus data?',
+					text: 'Data yang telah dihapus, tidak dapat dikembalikan.',
+					icon: 'warning',
+				})
+					.then((result) => {
+						if (result.isConfirmed) {
+							document.getElementById(`form-delete-${id}`).submit();
+						}
+					})
+			},
+			init() {
+				this.$watch('pagination', (value) => {
+					const { currentPage, perPage } = value;
+
+					const qParams = new URLSearchParams(this.getFilterQueries());
+					qParams.append('pp', perPage);
+					qParams.append('p', currentPage);
+
+					window.location.href = '{{baseRoute}}?' + qParams.toString();
+				});
+			}
+		};
+	}
+</script>
+{{/content}}
