@@ -14,6 +14,7 @@ export interface ResidentAssocAttributes {
 }
 
 export interface ResidentAssocDueAttributes {
+	id: number;
 	description: string;
 	amount: number;
 	type: number;
@@ -23,6 +24,7 @@ export interface ResidentAssocDueAttributes {
 	date: string;
 	createdAt: string;
 	updatedAt: string;
+	user_resident: UserResidentAttributes;
 }
 
 export interface RoleAttributes {

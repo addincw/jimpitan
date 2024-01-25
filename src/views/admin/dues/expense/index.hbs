@@ -92,7 +92,7 @@
 					<th>Jumlah</th>
 					<th>Penerima</th>
 					<th style="width: 220px;">Tgl. Pengeluaran</th>
-					<th>Dicatat Oleh</th>
+					<th style="width: 180px;">Dicatat Oleh</th>
 					<th class="text-center" style="width: 60px"></th>
 				</tr>
 			</thead>
@@ -108,7 +108,7 @@
 								<div class="text-truncate">
 									{{item.user_resident.user.firstname}} {{item.user_resident.user.lastname}}
 								</div>
-								{{lookup item.user_resident.resident_assoc 'name'}}, {{lookup item.user_resident.resident_assoc.community_assoc 'name'}}
+								{{lookup item.user_resident 'address'}}
 							{{/if}}
 						</td>
 						<td>{{item.date}}</td>

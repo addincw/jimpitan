@@ -67,7 +67,7 @@
 {{#content "scripts"}}
 	<script type="text/javascript" src="/plugins/select2/js/select2.full.min.js"></script>
     <script>
-        const userResidentSelection = $('.select2').select2({
+        const userResidentSelection = $('[name="user_resident_id"]').select2({
             placeholder: "Pilih Penerima",
             allowClear: true,
         });

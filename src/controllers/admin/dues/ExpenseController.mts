@@ -198,19 +198,35 @@ export async function store(req: Request, res: Response) {
 export async function edit(req: Request, res: Response) {
 	const { id } = req.params;
 
-	const communityAssocs = await CommunityAssoc.findAll();
-	const roles = await Role.findAll({
-		where: { id: [1, 2] },
+	const userFunctionary = await getUserFunctionaryLoggedIn(req.user);
+	const userResidents = await User.findAll({
+		where: {
+			role_id: 3,
+			"$user_resident.resident_assoc_id$": userFunctionary.resident_assoc_id,
+		},
+		include: ["user_resident"],
 	});
 
-	const data = await User.findByPk(id, {
+	const data = await ResidentAssocDue.findByPk(id, {
 		include: [
-			"role",
 			{
 				model: UserFunctionary,
 				as: "user_functionary",
+				include: [
+					"user",
+					{
+						model: ResidentAssoc,
+						as: "resident_assoc",
+						include: ["community_assoc"],
+					},
+				],
+			},
+			{
+				model: UserResident,
+				as: "user_resident",
 				required: false,
 				include: [
+					"user",
 					{
 						model: ResidentAssoc,
 						as: "resident_assoc",
@@ -221,73 +237,44 @@ export async function edit(req: Request, res: Response) {
 		],
 	});
 
-	const user = data.toJSON();
-	const userFunctionary = user.user_functionary;
-	const fullname = user.firstname + " " + user.lastname;
+	const dataJSON = data.toJSON();
 
 	res.render(baseRouteView + "/edit", {
-		title: "Edit Pengguna: " + fullname,
+		title: "Edit Pengeluaran: ",
+		userResidents: userResidents.map((user) => user.toJSON()),
 		formData: {
-			id: user.id,
-			firstname: user.firstname,
-			lastname: user.lastname,
-			phone: user.phone,
-			role_id: user.role_id,
-			username: user.username,
-			community_assoc_id: userFunctionary?.resident_assoc?.community_assoc_id,
-			resident_assoc_id: userFunctionary?.resident_assoc_id,
+			id: dataJSON.id,
+			description: dataJSON.description,
+			amount: dataJSON.amount,
+			date: moment(dataJSON.date).format("YYYY-MM-DD"),
+			user_resident_id: dataJSON.user_resident_id,
 		},
-		roles: roles.map((row) => row.toJSON()),
-		communityAssocs: communityAssocs.map((row) => {
-			return row.toJSON();
-		}),
 	});
 }
 
 export async function update(req: Request, res: Response) {
 	const { id } = req.params;
 
-	const dbTransaction = await sequelize.transaction();
-
 	try {
-		const data = await User.findByPk(id);
+		const data = await ResidentAssocDue.findByPk(id);
 
-		const validFormData = expenseFormSchema.parse(req.body);
+		const validFormData = expenseFormSchema.parse({
+			...req.body,
+			amount: parseInt(req.body.amount),
+		});
+		const userResidentId =
+			req.body.user_resident_id !== ""
+				? parseInt(req.body.user_resident_id)
+				: null;
 
-		const dataWillUpdate: Record<string, any> = {
-			firstname,
-			lastname,
-			phone,
-			role_id,
-		};
-
-		if (role_id == 1) dataWillUpdate.username = username;
-
-		if (req.body.req_change_password) {
-			dataWillUpdate.password = hashMake(password);
-			if (role_id == 2) {
-				dataWillUpdate.username = username;
-			}
-		}
-
-		await data.update(dataWillUpdate);
-
-		if (role_id == 2) {
-			const userFunctionary = await UserFunctionary.findOne({
-				where: { user_id: data.get("id") as number },
-			});
-			userFunctionary.update({
-				resident_assoc_id: parseInt(req.body.resident_assoc_id),
-			});
-		}
-
-		await dbTransaction.commit();
+		await data.update({
+			...validFormData,
+			user_resident_id: userResidentId,
+		});
 
 		req.flash("success", "data berhasil tersimpan");
 		res.redirect(baseRoute + "/");
 	} catch (error) {
-		await dbTransaction.rollback();
-
 		req.flash("old", JSON.stringify(req.body));
 
 		if (error instanceof z.ZodError) {
