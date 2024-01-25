@@ -22,7 +22,6 @@ module.exports = {
 				defaultValue: 0, // 0 = in; 1 = out
 			},
 			resident_assoc_id: {
-				allowNull: false,
 				references: {
 					key: "id",
 					model: "resident_assocs",

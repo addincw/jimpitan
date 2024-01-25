@@ -60,6 +60,6 @@ module.exports = {
 	},
 
 	async down(queryInterface, Sequelize) {
-		await queryInterface.bulkDelete("Resident_Assoc_Dues", null, {});
+		await queryInterface.bulkDelete("Resident_Assoc_Dues", { type: 0 }, {});
 	},
 };
