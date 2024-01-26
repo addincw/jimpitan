@@ -5,6 +5,23 @@
 		<title>{{title}}{{#if appName}} | {{/if}}{{appName}}</title>
 		<link rel="stylesheet" href="/css/gradfull-theme.css" />
 		{{#block "styles"}}{{/block}}
+		{{!-- prettier-ignore --}}
+		<style type="text/css">
+				.select2-container {
+					display: block;
+				}
+				.select2-container--default .select2-selection--single {
+					height: auto;
+					border: var(--bs-border-width) solid var(--bs-border-color);
+					border-radius: var(--bs-border-radius);
+					padding: .24rem .75rem;
+				}
+				.select2-container--default .select2-selection--single .select2-selection__arrow {
+					top: 50%;
+					transform: translateY(-50%);
+				}
+		</style>
+		{{!-- prettier-ignore --}}
 	</head>
 	<body class="home">
 		<nav class="navbar navbar-transparent navbar-expand-lg">
@@ -133,10 +150,10 @@
 			</section>
 		</footer>
 
+		<script src="/plugins/jquery/jquery.min.js"></script>
+		<script src="/js/gradfull-theme.js"></script>
+		<script src="/js/utils.js"></script>
 		{{#block "scripts"}}
-			<script src="/plugins/jquery/jquery.min.js"></script>
-			<script src="/js/gradfull-theme.js"></script>
-			<script src="/js/utils.js"></script>
 			<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 		{{/block}}
 	</body>

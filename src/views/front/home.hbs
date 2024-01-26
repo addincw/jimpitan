@@ -1,14 +1,8 @@
-{{#content "styles"}}
+{{#content "styles" mode="append"}}
 	<link rel="stylesheet" href="/plugins/select2/css/select2.min.css" />
-	<style>
-		.select2-container {
-			display: block;
-		}
-		.column-sticky-left { position: sticky; left: 0; z-index: 1;
-		min-width:160px; max-width:160px; } @media screen and (min-width: 768px) {
-		.column-sticky-left { min-width: 220px; max-width: 220px; } }
-	</style>
 {{/content}}
+
+<input type="hidden" name="daysEachMonths" value="{{stringify daysEachMonths}}" />
 
 <section class="banner bg-gradient-seagreen py-80 px-3">
 	<div class="container">
@@ -91,10 +85,7 @@
 </section>
 
 <!-- reports -->
-<section
-	x-data="{ daysEachMonths: {{stringify daysEachMonths}} }"
-	class="py-80"
->
+<section class="py-80">
 	<div class="container">
 		<h2 class="underline">Riwayat Jimpitan Warga</h2>
 		<p class="mb-50">
@@ -105,8 +96,6 @@
 		{{> infograph/due-peruser}}
 	</div>
 </section>
-
-<!-- contact form -->
 
 <!-- contact -->
 <section class="bg-gradient-seagreen py-80">
@@ -165,5 +154,6 @@
 </section>
 
 {{#content "scripts" mode="prepend"}}
+	<script type="text/javascript" src="/plugins/select2/js/select2.full.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 {{/content}}
