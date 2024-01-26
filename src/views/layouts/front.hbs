@@ -138,7 +138,14 @@
 			</section>
 		</footer>
 
-		<script src="/js/front.js"></script>
-		{{#block "scripts"}}{{/block}}
+		{{#block "scripts"}}
+			<script src="/plugins/jquery/jquery.min.js"></script>
+			<script src="/js/front.js"></script>
+			<script src="/js/admin.js"></script>
+			<script
+				defer
+				src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
+			></script>
+		{{/block}}
 	</body>
 </html>
