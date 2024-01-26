@@ -8,9 +8,8 @@
 		{{#block "styles"}}{{/block}}
 		<link rel="stylesheet" href="/css/adminlte.min.css" />
 		<style>
-			.form-control.select2.is-invalid ~ .select2 > .selection >
-			.select2-selection { border-color: #dc3545;} .content-wrapper { height:
-			max-content; }
+			.form-control.select2.is-invalid ~ .select2 > .selection > .select2-selection { border-color: #dc3545;}
+			.content-wrapper { height: max-content; }
 		</style>
 	</head>
 	<body class="sidebar-mini layout-fixed">
@@ -53,11 +52,7 @@
 				<div class="sidebar">
 					<div class="user-panel mt-3 pb-3 mb-3 d-flex">
 						<div class="image">
-							<img
-								src="/img/avatar.png"
-								class="img-circle elevation-0"
-								alt="User Image"
-							/>
+							<img src="/img/avatar.png" class="img-circle elevation-0" alt="User Image" />
 						</div>
 						<div class="info">
 							<a href="#" class="d-block text-capitalize">
@@ -72,12 +67,7 @@
 					</div>
 					<!-- Sidebar Menu -->
 					<nav class="mt-2">
-						<ul
-							class="nav nav-pills nav-sidebar flex-column"
-							data-widget="treeview"
-							role="menu"
-							data-accordion="false"
-						>
+						<ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
 							<!-- Add icons to the links using the .nav-icon class
                with font-awesome or any other icon font library -->
 							<li class="nav-item">
@@ -109,10 +99,7 @@
 							{{#if (eq user.role_id 1)}}
 								<li class="nav-header">KELOLA WARGA</li>
 								<li class="nav-item">
-									<a
-										href="/admin/residential/community-assocs"
-										class="nav-link"
-									>
+									<a href="/admin/residential/community-assocs" class="nav-link">
 										<i class="nav-icon fas fa-project-diagram"></i>
 										<p>Rukun Warga (RW)</p>
 									</a>
@@ -154,12 +141,7 @@
 			<div class="content-wrapper">
 				{{#if notification}}
 					<div class="m-2 alert alert-{{notification.type}} alert-dismisable">
-						<button
-							type="button"
-							class="close"
-							data-dismiss="alert"
-							aria-hidden="true"
-						>×</button>
+						<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
 						<h5 class="text-capitalize">
 							<i class="icon fas {{notification.icon}}"></i>
 							{{notification.title}}
@@ -200,11 +182,8 @@
 		<script src="/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
 		<script src="/plugins/sweetalert2/sweetalert2.all.min.js"></script>
 		<script src="/js/adminlte.min.js"></script>
-		<script src="/js/admin.js"></script>
+		<script src="/js/utils.js"></script>
 		{{#block "scripts"}}{{/block}}
-		<script
-			defer
-			src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
-		></script>
+		<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 	</body>
 </html>

@@ -3,7 +3,7 @@
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<title>{{title}}{{#if appName}} | {{/if}}{{appName}}</title>
-		<link rel="stylesheet" href="/css/front.css" />
+		<link rel="stylesheet" href="/css/gradfull-theme.css" />
 		{{#block "styles"}}{{/block}}
 	</head>
 	<body class="home">
@@ -58,12 +58,7 @@
 						<h5 class="offcanvas-title" id="navbarNavAltMarkupLabel">
 							Navigation Menu
 						</h5>
-						<button
-							type="button"
-							class="btn-close"
-							data-bs-dismiss="offcanvas"
-							aria-label="Close"
-						></button>
+						<button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
 					</div>
 					<div class="offcanvas-body">
 						<nav class="nav flex-column">
@@ -140,12 +135,9 @@
 
 		{{#block "scripts"}}
 			<script src="/plugins/jquery/jquery.min.js"></script>
-			<script src="/js/front.js"></script>
-			<script src="/js/admin.js"></script>
-			<script
-				defer
-				src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
-			></script>
+			<script src="/js/gradfull-theme.js"></script>
+			<script src="/js/utils.js"></script>
+			<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 		{{/block}}
 	</body>
 </html>
