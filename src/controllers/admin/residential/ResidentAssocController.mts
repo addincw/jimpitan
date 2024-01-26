@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { z } from "zod";
 
 import db from "../../../../database/models/index.cjs";
+import { generateRandomRGBColor } from "../../../helpers/string.mjs";
 
 const { CommunityAssoc, ResidentAssoc } = db;
 
@@ -67,7 +68,10 @@ export async function store(req: Request, res: Response) {
 			community_assoc_id: parseInt(req.body.community_assoc_id),
 		});
 
-		await ResidentAssoc.create(validFormData);
+		await ResidentAssoc.create({
+			...validFormData,
+			color_code: generateRandomRGBColor("0.1"),
+		});
 
 		req.flash("success", "data berhasil tersimpan");
 		res.redirect(baseRoute + "/");
