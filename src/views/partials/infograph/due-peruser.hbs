@@ -1,129 +1,271 @@
-<div class="mt-3 pb-3">
-	<div class="d-flex align-items-center justify-content-between">
-		<div class="row g-3 align-items-center">
-			<div class="col-auto">
-				<label for="inputPassword6" class="col-form-label">Show</label>
-			</div>
-			<div class="col-auto">
-				<select
-					class="form-select"
-					name="per_page"
-					aria-label="Data per halaman"
-				>
-					<option value="10" selected>10</option>
-					<option value="20">20</option>
-					<option value="30">30</option>
-				</select>
-			</div>
-			<div class="col-auto">
-				<span class="form-text">Entries</span>
-			</div>
-		</div>
-
-		<a
-			class="btn btn-primary"
-			data-bs-toggle="collapse"
-			href="#collapse-jimpitan-report-filter"
-			role="button"
-			aria-expanded="true"
-			aria-controls="collapse-jimpitan-report-filter"
-		>
-			<i class="bi bi-funnel me-1"></i>
-			Filter Riwayat
-		</a>
-	</div>
-
-	<div class="collapse show" id="collapse-jimpitan-report-filter">
-		<div class="mt-3 card card-body">
-			<form class="row g-3">
-				<div class="col-12 col-sm-auto">
-					<label for="rw" class="form-label">RW</label>
-					<select class="form-select" name="rw" aria-label="Pilih RW">
-						<option selected>Pilih RW</option>
-						<option value="1">One</option>
-						<option value="2">Two</option>
-						<option value="3">Three</option>
+{{#content "styles" mode="prepend"}}
+	{{!-- prettier-ignore --}}
+	<style type="text/css">
+		.column-sticky-left {
+			position: sticky;
+			left: 0;
+			z-index: 1;
+			min-width:160px;
+			max-width:160px;
+		} 
+		@media screen and (min-width: 768px) {
+			.column-sticky-left {
+				min-width: 220px;
+				max-width: 220px;
+			}
+		}
+	</style>
+	{{!-- prettier-ignore --}}
+{{/content}}
+<div class="due-peruser" x-data="initDuePerUserData()">
+	<div class="mt-3 pb-3">
+		<div class="d-flex align-items-center justify-content-between">
+			<div class="row g-3 align-items-center">
+				<div class="col-auto">
+					<label for="per_page" class="col-form-label">Show</label>
+				</div>
+				<div class="col-auto">
+					<select class="form-select" name="per_page" aria-label="Data per halaman" x-model="pagination.per_page">
+						<option value="10">10</option>
+						<option value="20">20</option>
 					</select>
 				</div>
-				<div class="col-12 col-sm-auto">
-					<label for="rt" class="form-label">RT</label>
-					<select class="form-select" name="rt" aria-label="Pilih RT">
-						<option selected>Pilih RT</option>
-						<option value="1">One</option>
-						<option value="2">Two</option>
-						<option value="3">Three</option>
-					</select>
+				<div class="col-auto">
+					<span class="form-text">Entries</span>
 				</div>
-				<div class="col-12 col-sm-auto">
-					<label for="resident" class="form-label">Warga</label>
-					<input
-						type="text"
-						name="resident"
-						class="form-control"
-						placeholder="Nama Warga. Min: 3 char"
-						aria-label="warga"
-					/>
-				</div>
-			</form>
+			</div>
+
+			<a
+				class="btn btn-primary"
+				data-bs-toggle="collapse"
+				href="#collapse-jimpitan-report-filter"
+				role="button"
+				aria-expanded="true"
+				aria-controls="collapse-jimpitan-report-filter"
+			>
+				<i class="bi bi-funnel me-1"></i>
+				Filter Riwayat
+			</a>
+		</div>
+
+		<div class="collapse show" id="collapse-jimpitan-report-filter">
+			<div class="mt-3 card card-body">
+				<form class="row g-3">
+					<div class="col-6 col-md-2">
+						<label for="rw" class="form-label"> RW </label>
+						<select
+							class="form-control select2 {{echoif (lookup errors.fieldErrors 'community_assoc_id') 'is-invalid'}}"
+							name="community_assoc_id"
+							width="100%"
+						>
+							<option value=""></option>
+							{{#each communityAssocs as |communityAssoc|}}
+								<option value="{{communityAssoc.id}}">
+									{{communityAssoc.name}}
+								</option>
+							{{/each}}
+						</select>
+					</div>
+					<div class="col-6 col-md-2">
+						<label for="resident_assoc_id" class="form-label"> RT </label>
+						<select class="form-select" name="resident_assoc_id" aria-label="Pilih RT">
+							<option value=""></option>
+						</select>
+					</div>
+					<div class="col-12 col-md-4">
+						<label for="resident" class="form-label">Warga</label>
+						<input
+							type="text"
+							name="resident"
+							class="form-control"
+							placeholder="Nama Warga. Min: 3 char"
+							aria-label="warga"
+							x-model.debounce="filters.q"
+						/>
+					</div>
+				</form>
+			</div>
 		</div>
 	</div>
-</div>
 
-<div class="table-responsive mb-2">
-	<table class="table table-bordered">
-		<thead>
-			<tr>
-				<th scope="col" class="column-sticky-left" rowspan="3">Warga</th>
-				<template x-for="month in daysEachMonths">
-					<th
-						class="text-center"
-						x-bind:colspan="month.days"
-						x-text="month.month"
-					></th>
-				</template>
-			</tr>
-			<tr>
-				<template x-for="month in daysEachMonths">
-					<template x-for="i in month.days">
-						<th scope="col" class="text-center" x-text="i"></th>
-					</template>
-				</template>
-			</tr>
-		</thead>
-		<tbody>
-			<template x-for="row in 10">
+	<div class="table-responsive mb-2">
+		<table class="table table-bordered">
+			<thead>
 				<tr>
-					<td class="column-sticky-left">
-						<div class="fw-bold text-truncate">
-							Irawan Achmad Irawan Achmad Irawan Achmad
-						</div>
-						RT 04, RW 01
-					</td>
+					<th scope="col" class="column-sticky-left" rowspan="3">Warga</th>
+					<template x-for="month in daysEachMonths">
+						<th class="text-center" x-bind:colspan="month.days" x-text="month.month"></th>
+					</template>
+				</tr>
+				<tr>
 					<template x-for="month in daysEachMonths">
 						<template x-for="i in month.days">
-							<td class="text-center text-light text-success">
-								<i class="bi bi-check-square-fill"></i>
-							</td>
+							<th scope="col" class="text-center" x-text="i"></th>
 						</template>
 					</template>
 				</tr>
+			</thead>
+			<tbody>
+				<template x-for="item in data">
+					<tr>
+						<td class="column-sticky-left">
+							<div class="fw-bold text-truncate" x-text="`${item.user.firstname} ${item.user.lastname}`"></div>
+							<span x-text="`${item.resident_assoc.name}, ${item.resident_assoc.community_assoc.name}`"></span>
+						</td>
+						<template x-for="(month, monthIdx) in daysEachMonths">
+							<template x-for="i in month.days">
+								<td
+									class="text-center"
+									x-bind:class="item.dues.includes(formatMonthDate(monthIdx + 1, i)) ? 'text-success' : 'text-light'"
+								>
+									<i class="bi bi-check-square-fill"></i>
+								</td>
+							</template>
+						</template>
+					</tr>
+				</template>
+			</tbody>
+		</table>
+	</div>
+
+	<nav
+		class="d-flex flex-column flex-md-row align-items-center justify-content-between"
+		aria-label="Paginasi Riwayat Jimpitan Warga"
+	>
+		<p x-text="`Showing ${data_show.from} to ${data_show.to} of ${data_total} entries`"></p>
+		<ul class="pagination">
+			<li class="page-item">
+				<a
+					class="page-link"
+					x-bind:class="!pagination.page_prev && 'disabled'"
+					x-bind:disabled="!pagination.page_prev"
+					x-on:click="goToPrevPage()"
+				>
+					Previous
+				</a>
+			</li>
+			<template x-for="page in pagination.page_total">
+				<li
+					class="page-item"
+					x-bind:class="pagination.page === page && 'active'"
+					x-bind:aria-current="pagination.page === page && 'page'"
+				>
+					<a class="page-link" x-on:click.prevent="pagination.page = page;" x-text="page"></a>
+				</li>
 			</template>
-		</tbody>
-	</table>
+			<li class="page-item">
+				<a
+					class="page-link"
+					x-bind:class="!pagination.page_next && 'disabled'"
+					x-bind:disabled="!pagination.page_next"
+					x-on:click="goToNextPage()"
+				>
+					Next
+				</a>
+			</li>
+		</ul>
+	</nav>
 </div>
 
-<nav
-	class="d-flex flex-column flex-md-row align-items-center justify-content-between"
-	aria-label="Paginasi Riwayat Jimpitan Warga"
->
-	<p>Showing 1 to 10 of 57 entries</p>
-	<ul class="pagination">
-		<li class="page-item"><a class="page-link" href="#">Previous</a></li>
-		<li class="page-item active" aria-current="page">
-			<a class="page-link" href="#">1</a>
-		</li>
-		<li class="page-item"><a class="page-link" href="#">2</a></li>
-		<li class="page-item"><a class="page-link" href="#">3</a></li>
-		<li class="page-item"><a class="page-link" href="#">Next</a></li>
-	</ul>
-</nav>
+{{#content "scripts" mode="prepend"}}
+	{{!-- prettier-ignore --}}
+	<script type="text/javascript">
+		const currentMonthIndex = new Date().getMonth();
+		function initDuePerUserData() {
+			return {
+				daysEachMonths: [JSON.parse($('[name="daysEachMonths"]').val())[currentMonthIndex]],
+				filters: {
+					communityAssocId: "",
+					residentAssocId: "",
+					q: "",
+				},
+				data: [],
+				data_total: 0,
+				data_show: {
+					from: 0,
+					to: 0,
+				},
+				pagination: {
+					per_page: 10,
+					page: 1,
+					page_total: 1,
+					page_next: null,
+					page_prev: null,
+				},
+				init() {
+					const root = this;
+
+					$('.due-peruser [name="community_assoc_id"]').select2({ placeholder: "Pilih RW", allowClear: true });
+					$('.due-peruser [name="community_assoc_id"]').change(function() {
+						root.filters.communityAssocId = $(this).val();
+
+						$('.due-peruser [name="resident_assoc_id"]').val("").trigger("change");
+
+						const communityAssocId = $(this).val();
+						const residentAssocsApiUrl = `/api/community-assocs/${communityAssocId}/resident-assocs`;
+						select2AjaxHandler('.due-peruser [name="resident_assoc_id"]', residentAssocsApiUrl, {
+							placeholder: "Pilih RT",
+							allowClear: true,
+						});
+					});
+
+					$('.due-peruser [name="resident_assoc_id"]').select2({ placeholder: "Pilih RT", allowClear: true });
+					$('.due-peruser [name="resident_assoc_id"]').change(function() {
+						root.filters.residentAssocId = $(this).val();
+					})
+
+					root.$watch('filters', () => root.fetchDataPerUser());
+					root.$watch('pagination.page', () => root.fetchDataPerUser());
+					root.$watch('pagination.per_page', () => root.fetchDataPerUser());
+
+					root.fetchDataPerUser();
+				},
+				async fetchDataPerUser() {
+					const qParams = new URLSearchParams(this.getFilterQueries());
+					qParams.append('pp', this.pagination.per_page);
+					qParams.append('p', this.pagination.page);
+
+					const fetchData = await fetch('/api/dues/income/peruser?' + qParams.toString());
+
+					if (fetchData.status !== 200) return;
+
+					const { data, data_total, data_show, pagination } = await fetchData.json();
+					this.data = data;
+					this.data_total = data_total;
+					this.data_show = data_show;
+
+					this.pagination.page_prev = pagination.page_prev;
+					this.pagination.page_next = pagination.page_next;
+					this.pagination.page_total = pagination.page_total;
+				},
+				formatMonthDate(month, date) {
+					const datePrefixed = date < 10 ? `0${date}` : date;
+					const monthPrefixed = month < 10 ? `0${month}` : month;
+					return `${monthPrefixed}-${datePrefixed}`;
+				},
+				getFilterQueries() {
+					const qParams = new URLSearchParams();
+					if(this.filters.communityAssocId) {
+						qParams.append('f.cai', this.filters.communityAssocId);
+					}
+					if(this.filters.residentAssocId) {
+						qParams.append('f.rai', this.filters.residentAssocId);
+					}
+					if(this.filters.q) {
+						qParams.append('f.q', this.filters.q);
+					}
+					return qParams;
+				},
+				goToPrevPage() {
+					if (!this.pagination.page_prev) return;
+					this.pagination.page = this.pagination.page_prev;
+				},
+				goToNextPage() {
+					if (!this.pagination.page_next) return;
+					this.pagination.page = this.pagination.page_next;
+				},					
+			}
+		}
+	</script>
+	{{!-- prettier-ignore --}}
+{{/content}}
