@@ -1,4 +1,4 @@
-<div x-data="initDueMonthlyData()">
+<div class="due-monthly" x-data="initDueMonthlyData()">
 	<div class="mt-3 pb-3">
 		<div class="d-flex align-items-center justify-content-end">
 			<a
@@ -61,22 +61,22 @@
 				init() {
 					const root = this;
 
-					$('[name="community_assoc_id"]').select2({ placeholder: "Pilih RW", allowClear: true });
-					$('[name="community_assoc_id"]').change(function() {
+					$('.due-monthly [name="community_assoc_id"]').select2({ placeholder: "Pilih RW", allowClear: true });
+					$('.due-monthly [name="community_assoc_id"]').change(function() {
 						root.filters.communityAssocId = $(this).val();
 
-						$('[name="resident_assoc_id"]').val("").trigger("change");
+						$('.due-monthly [name="resident_assoc_id"]').val("").trigger("change");
 
 						const communityAssocId = $(this).val();
 						const residentAssocsApiUrl = `/api/community-assocs/${communityAssocId}/resident-assocs`;
-						select2AjaxHandler('[name="resident_assoc_id"]', residentAssocsApiUrl, {
+						select2AjaxHandler('.due-monthly [name="resident_assoc_id"]', residentAssocsApiUrl, {
 							placeholder: "Pilih RT",
 							allowClear: true,
 						});
 					});
 
-					$('[name="resident_assoc_id"]').select2({ placeholder: "Pilih RT", allowClear: true });
-					$('[name="resident_assoc_id"]').change(function() {
+					$('.due-monthly [name="resident_assoc_id"]').select2({ placeholder: "Pilih RT", allowClear: true });
+					$('.due-monthly [name="resident_assoc_id"]').change(function() {
 						root.filters.residentAssocId = $(this).val();
 					})
 
