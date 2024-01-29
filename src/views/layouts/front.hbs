@@ -51,7 +51,14 @@
 								</a>
 								<ul class="dropdown-menu" aria-labelledby="user-options">
 									<li><a class="dropdown-item" href="/admin">Admin Panel</a></li>
-									<li><a class="dropdown-item" href="/admin/logout">Logout</a></li>
+									<li>
+										<form action="/admin/logout" method="POST">
+											{{{method "PUT"}}}
+											<button class="dropdown-item" type="submit">
+												Logout
+											</button>
+										</form>
+									</li>
 								</ul>
 							</div>
 						{{else}}
