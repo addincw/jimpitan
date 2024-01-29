@@ -12,5 +12,6 @@ router.get("/community-assocs/:id/resident-assocs/:residentAssocId", ResidentAss
 
 router.get("/dues/income/monthly", ResidentAssocDueController.getReportMonthly);
 router.get("/dues/income/peruser", ResidentAssocDueController.getReportPerUser);
+router.get("/dues/in-out", ResidentAssocDueController.getReportInOut);
 
 export default router;

@@ -1,0 +1,143 @@
+{{#content "styles" mode="prepend"}}
+	<style>
+		.color-code-preview { --colorcode: white; display: block; width: 20px; height: 20px; background-color:
+		var(--colorcode); }
+	</style>
+{{/content}}
+
+<div class="due-inout" x-data="initDueInOutData()">
+	<div class="mt-3 pb-3">
+		<div class="mb-3 d-flex align-items-center justify-content-between">
+			<div class="row g-3 align-items-center">
+				<div class="col-auto">
+					<label for="per_page" class="col-form-label">Show</label>
+				</div>
+				<div class="col-auto">
+					<select class="form-select" name="per_page" aria-label="Data per halaman" x-model="pagination.per_page">
+						<option value="10">10</option>
+						<option value="20">20</option>
+					</select>
+				</div>
+				<div class="col-auto">
+					<span class="form-text">Entries</span>
+				</div>
+			</div>
+		</div>
+
+		<div class="table-responsive mb-2">
+			<table class="table table-bordered">
+				<thead>
+					<tr>
+						<th>RT</th>
+						<th>RW</th>
+						<th>Total Iuran Diterima</th>
+						<th>Total Iuran Terpakai</th>
+						<th>Sisa Iuran</th>
+					</tr>
+				</thead>
+				<tbody>
+					<template x-for="item in data">
+						<tr>
+							<td class="d-flex align-items-center">
+								<span
+									class="color-code-preview border border-light rounded me-2"
+									x-bind:style="{'--colorcode': item.resident_assoc.color_code}"
+								></span>
+								<span x-text="item.resident_assoc.name"></span>
+							</td>
+							<td x-text="item.resident_assoc.community_assoc.name"></td>
+							<td x-text="'Rp. ' + item.total_in"></td>
+							<td x-text="'Rp. ' + item.total_out"></td>
+							<td x-text="'Rp. ' + item.balance"></td>
+						</tr>
+					</template>
+				</tbody>
+			</table>
+		</div>
+
+		<nav
+			class="d-flex flex-column flex-md-row align-items-center justify-content-between"
+			aria-label="Paginasi Riwayat Jimpitan Warga"
+		>
+			<p x-text="`Showing ${data_show.from} to ${data_show.to} of ${data_total} entries`"></p>
+			<ul class="pagination">
+				<li class="page-item">
+					<a
+						class="page-link"
+						x-bind:class="!pagination.page_prev && 'disabled'"
+						x-bind:disabled="!pagination.page_prev"
+						x-on:click="goToPrevPage()"
+					>
+						Previous
+					</a>
+				</li>
+				<template x-for="page in pagination.page_total">
+					<li
+						class="page-item"
+						x-bind:class="pagination.page === page && 'active'"
+						x-bind:aria-current="pagination.page === page && 'page'"
+					>
+						<a class="page-link" x-on:click.prevent="pagination.page = page;" x-text="page"></a>
+					</li>
+				</template>
+				<li class="page-item">
+					<a
+						class="page-link"
+						x-bind:class="!pagination.page_next && 'disabled'"
+						x-bind:disabled="!pagination.page_next"
+						x-on:click="goToNextPage()"
+					>
+						Next
+					</a>
+				</li>
+			</ul>
+		</nav>
+	</div>
+</div>
+{{#content "scripts" mode="prepend"}}
+	{{!-- prettier-ignore --}}
+	<script type="text/javascript">
+        function initDueInOutData() {
+            return {
+				data: [],
+				data_total: 0,
+				data_show: {
+					from: 0,
+					to: 0,
+				},
+				pagination: {
+					per_page: 10,
+					page: 1,
+					page_total: 1,
+					page_next: null,
+					page_prev: null,
+				},
+                init() {
+					this.$watch('pagination.page', () => this.fetchDataPerUser());
+					this.$watch('pagination.per_page', () => this.fetchDataPerUser());
+
+					this.fetchDataInOut();
+                },
+				async fetchDataInOut() {
+					const qParams = new URLSearchParams();
+					qParams.append('pp', this.pagination.per_page);
+					qParams.append('p', this.pagination.page);
+
+					const fetchData = await fetch('/api/dues/in-out?' + qParams.toString());
+
+					if (fetchData.status !== 200) return;
+
+					const { data, data_total, data_show, pagination } = await fetchData.json();
+					this.data = data;
+					this.data_total = data_total;
+					this.data_show = data_show;
+
+					this.pagination.page_prev = pagination.page_prev;
+					this.pagination.page_next = pagination.page_next;
+					this.pagination.page_total = pagination.page_total;
+				},                            
+            };
+        }
+    </script>
+	{{!-- prettier-ignore --}}
+{{/content}}
