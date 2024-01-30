@@ -52,7 +52,7 @@
 	<div class="card-header filter">
 		<div class="mt-3 px-1">
 			<form class="row g-3">
-				<div class="col-12 col-sm-2">
+				<div class="col-12 col-sm-2 mb-3 mb-sm-0">
 					<label for="rw" class="form-label">RW</label>
 					<select class="form-control select2" name="f.community_assoc_id" aria-label="Pilih RW" x-on:change="console.log('rw changed')">
 						<option value=""></option>
@@ -61,13 +61,13 @@
 						{{/each}}
 					</select>
 				</div>
-				<div class="col-12 col-sm-2">
+				<div class="col-12 col-sm-2 mb-3 mb-sm-0">
 					<label for="rt" class="form-label">RT</label>
 					<select class="form-control" name="f.resident_assoc_id" aria-label="Pilih RT">
 						<option value=""></option>
 					</select>
 				</div>
-				<div class="col-12 col-sm-4">
+				<div class="col-12 col-sm-4 mb-3 mb-sm-0">
 					<label for="resident" class="form-label">Warga</label>
 					<input
 						type="text"
@@ -98,7 +98,7 @@
 			</form>
 		</div>
 	</div>
-	<div class="card-body p-0">
+	<div class="card-body p-0 table-responsive">
 		{{!-- datatable --}}
 		<table class="table">
 			<thead>
@@ -157,7 +157,7 @@
 		<div
 			class="d-flex flex-column flex-md-row align-items-center justify-content-between"
 		>
-			<p class="m-0">Showing
+			<p class="m-0 mb-3 mb-sm-0">Showing
 				{{pagination.showFrom}}
 				to {{pagination.showTo}} of
 				{{pagination.totalCount}}
