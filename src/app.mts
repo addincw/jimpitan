@@ -41,6 +41,12 @@ app.use((req: Request, res: Response, next) => {
 		delete req.session.old;
 	}
 
+	if (req.user) {
+		res.header("Cache-Control", "private, no-cache, no-store, must-revalidate");
+		res.header("Expires", "-1");
+		res.header("Pragma", "no-cache");
+	}
+
 	res.locals.appName = process.env.APP_NAME;
 	next();
 });
@@ -51,7 +57,5 @@ app.use("/api", routeAPIs);
 app.use("/admin", routeAdmins);
 
 app.listen(process.env.APP_PORT, () => {
-	console.log(
-		`${process.env.APP_NAME} app is running on ${process.env.APP_URL}:${process.env.APP_PORT}`
-	);
+	console.log(`${process.env.APP_NAME} app is running on ${process.env.APP_URL}:${process.env.APP_PORT}`);
 });
