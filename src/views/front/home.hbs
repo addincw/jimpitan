@@ -2,168 +2,195 @@
 	<link rel="stylesheet" href="/plugins/select2/css/select2.min.css" />
 {{/content}}
 
-<input type="hidden" name="daysEachMonths" value="{{stringify daysEachMonths}}" />
+<div x-data="initHomeData()">
+	<input type="hidden" name="daysEachMonths" value="{{stringify daysEachMonths}}" />
 
-<section class="banner bg-gradient-seagreen py-80 px-3">
-	<div class="container">
-		<div class="row">
-			<div class="col-md-6">
-				<h1 class="fs-6 fw-normal">
-					<span class="banner-highlight-text d-block fw-semibold py-2">
-						Jimpitman, Gotong Royong Bantu Sesama
-					</span>
-				</h1>
+	<section class="banner bg-gradient-seagreen py-80 px-3">
+		<div class="container">
+			<div class="row">
+				<div class="col-md-6">
+					<h1 class="fs-6 fw-normal">
+						<span class="banner-highlight-text d-block fw-semibold py-2">
+							Jimpitman, Gotong Royong Bantu Sesama
+						</span>
+					</h1>
 
-				<p class="mb-50 lh-lg">
-					Aplikasi RT, RW, kelurahan Pekauman, kecamatan Sidoarjo. Kabupaten Sidoarjo.
-					<br>
-					untuk mengelola dan pelaporan hasil
-					<b>jimpitan</b>
-					warga, melanjutkan
-					<b>kearifan lokal dengan pemanfaatan teknologi</b>. Untuk pengaduan masyarakat, tentang pelayanan kelurahan hubungi kami melalui chat WhatsApp
-				</p>
+					<p class="mb-50 lh-lg">
+						Aplikasi RT, RW, kelurahan Pekauman, kecamatan Sidoarjo. Kabupaten Sidoarjo.
+						<br>
+						untuk mengelola dan pelaporan hasil
+						<b>jimpitan</b>
+						warga, melanjutkan
+						<b>kearifan lokal dengan pemanfaatan teknologi</b>. Untuk pengaduan masyarakat, tentang pelayanan kelurahan hubungi kami melalui chat WhatsApp
+					</p>
 
-				<button class="btn btn-lg btn-gradient-pearlgreen rounded-pill mr-3">
+					<div class="my-5">
+						<button class="btn btn-lg btn-gradient-pearlgreen rounded-pill me-3" x-on:click="document.querySelector('.contactus').scrollIntoView(true);">
+							<i class="bi bi-whatsapp me-1"></i>
+							Chat WhatsApp
+						</button>
+						<a href="tel:112" class="btn btn-lg btn-outline-light rounded-pill mt-4 mt-md-0">
+							<i class="bi bi-telephone me-2"></i>
+							Nomor darurat Sidoarjo 112
+						</a>
+					</div>
+				</div>
+				<div class="col-md-6 mt-5 m-md-auto text-center">
+					<img src="/img/logo-sda.png" width="300" height="271" alt="logo kabupaten sidoarjo" role="presentation">
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- experiences -->
+	<section class="experience py-80">
+		<div class="experience-content container">
+			<h2
+				class="underline underline-center"
+				style="margin: 0px auto 45px; width: 70%"
+			>
+				Hidup Rukun dan Harmonis dengan Bantu Sesama
+			</h2>
+			<p class="mb-50">
+				Menghimpun warga mulai dari RT, RW. Jimpitan diberikan secara sukarela
+				dari warga, dikelola oleh warga dan untuk membantu sesama warga.
+			</p>
+
+			<div class="statistics d-flex justify-content-center">
+				<div class="statistic">
+					<div class="label">{{statResidential.totalCommunityAssocs}}+</div>
+					Rukun Warga
+				</div>
+				<div class="statistic">
+					<div class="label">{{statResidential.totalResidentAssocs}}+</div>
+					Rukun Tetangga
+				</div>
+				<div class="statistic">
+					<div class="label">{{statResidential.totalUserResident}}+</div>
+					Kepala Keluarga
+				</div>
+			</div>
+		</div>
+
+		<img
+			class="experience-bg"
+			src="/img/bg-stacks.png"
+			role="presentation"
+			width="1440"
+			height="316"
+		/>
+	</section>
+
+	<!-- statistics -->
+	<section class="project">
+		<div class="container py-80">
+			<h2 class="underline">Grafik Pengumpulan Jimpitan Warga</h2>
+			<p class="mb-50">
+				Hasil pengumpulan jimpitan warga dikelompokkan berdasarkan RT dan RW.
+				Dapat di filter berdasarkan RT, RW, dan bulan
+			</p>
+
+			{{> infograph/due-monthly}}
+
+			<h3 class="mt-5 underline">Aliran Dana Iuran</h3>
+			<p class="mb-50">
+				Aliran dana iuran (iuran diterima, terpakai, maupun sisa) masing-masing RT
+			</p>
+			{{> infograph/due-inout}}
+		</div>
+	</section>
+
+	<!-- reports -->
+	<section class="py-80">
+		<div class="container">
+			<h2 class="underline">Riwayat Jimpitan Warga</h2>
+			<p class="mb-50">
+				Riwayat Jimpitan tiap Warga dikelompokkan berdasarkan RT dan RW. Dapat di
+				filter berdasarkan RT, RW, dan KK
+			</p>
+
+			{{> infograph/due-peruser}}
+		</div>
+	</section>
+
+	<!-- contact -->
+	<section class="bg-gradient-seagreen py-80">
+		<div class="container contactus">
+			<h2 class="underline">Contact Us</h2>
+			<p class="mb-50">
+				Apabila ada pertanyaan, kritik, maupun saran yang ingin anda sampaikan,
+				silahkan isi form berikut. Anda akan diarahkan ke chat WhatsApp customer
+				service kami.
+			</p>
+
+			<form action="https://wa.me/6281354539485" method="get" x-on:submit.prevent="redirectToWA($event.target);">
+				<div class="row mb-3">
+					<div class="col-md-6 mb-3 mb-md-0">
+						<div class="form-group">
+							<label for="name">Nama</label>
+							<input
+								type="text"
+								class="form-control"
+								name="name"
+								placeholder="Nama Anda"
+							/>
+						</div>
+					</div>
+					<div class="col-md-6"></div>
+				</div>
+
+				<div class="form-group mb-3">
+					<label for="subject">Jenis Pesan</label>
+					<select class="form-select" name="message_type">
+						<option value="pertanyaan" selected="">Pertanyaan</option>
+						<option value="kritik">Kritik</option>
+						<option value="saran">Saran</option>
+						<option value="pengaduan">Pengaduan</option>
+					</select>
+				</div>
+				<div class="form-group mb-50">
+					<label for="message">Isi Pesan</label>
+					<textarea
+						class="form-control"
+						name="message"
+						placeholder="Isi Pesan"
+						style="min-height: 140px"
+					></textarea>
+				</div>
+
+				<button
+					type="submit"
+					class="btn btn-lg btn-gradient-pearlgreen rounded-pill"
+				>
 					<i class="bi bi-whatsapp me-1"></i>
 					Chat WhatsApp
 				</button>
-				<p class="my-5"><i class="bi bi-telephone me-2"></i>Nomor darurat Sidoarjo 112</p>
-			</div>
-			<div class="col-md-6 mt-5 m-md-auto text-center">
-				<img src="/img/logo-sda.png" width="300" height="271" alt="logo kabupaten sidoarjo" role="presentation">
-			</div>
+			</form>
 		</div>
-	</div>
-</section>
-
-<!-- experiences -->
-<section class="experience py-80">
-	<div class="experience-content container">
-		<h2
-			class="underline underline-center"
-			style="margin: 0px auto 45px; width: 70%"
-		>
-			Hidup Rukun dan Harmonis dengan Bantu Sesama
-		</h2>
-		<p class="mb-50">
-			Menghimpun warga mulai dari RT, RW. Jimpitan diberikan secara sukarela
-			dari warga, dikelola oleh warga dan untuk membantu sesama warga.
-		</p>
-
-		<div class="statistics d-flex justify-content-center">
-			<div class="statistic">
-				<div class="label">{{statResidential.totalCommunityAssocs}}+</div>
-				Rukun Warga
-			</div>
-			<div class="statistic">
-				<div class="label">{{statResidential.totalResidentAssocs}}+</div>
-				Rukun Tetangga
-			</div>
-			<div class="statistic">
-				<div class="label">{{statResidential.totalUserResident}}+</div>
-				Kepala Keluarga
-			</div>
-		</div>
-	</div>
-
-	<img
-		class="experience-bg"
-		src="/img/bg-stacks.png"
-		role="presentation"
-		width="1440"
-		height="316"
-	/>
-</section>
-
-<!-- statistics -->
-<section class="project">
-	<div class="container py-80">
-		<h2 class="underline">Grafik Pengumpulan Jimpitan Warga</h2>
-		<p class="mb-50">
-			Hasil pengumpulan jimpitan warga dikelompokkan berdasarkan RT dan RW.
-			Dapat di filter berdasarkan RT, RW, dan bulan
-		</p>
-
-		{{> infograph/due-monthly}}
-
-		<h3 class="mt-5 underline">Aliran Dana Iuran</h3>
-		<p class="mb-50">
-			Aliran dana iuran (iuran diterima, terpakai, maupun sisa) masing-masing RT
-		</p>
-		{{> infograph/due-inout}}
-	</div>
-</section>
-
-<!-- reports -->
-<section class="py-80">
-	<div class="container">
-		<h2 class="underline">Riwayat Jimpitan Warga</h2>
-		<p class="mb-50">
-			Riwayat Jimpitan tiap Warga dikelompokkan berdasarkan RT dan RW. Dapat di
-			filter berdasarkan RT, RW, dan KK
-		</p>
-
-		{{> infograph/due-peruser}}
-	</div>
-</section>
-
-<!-- contact -->
-<section class="bg-gradient-seagreen py-80">
-	<div class="container">
-		<h2 class="underline">Contact Us</h2>
-		<p class="mb-50">
-			Apabila ada pertanyaan, kritik, maupun saran yang ingin anda sampaikan,
-			silahkan isi form berikut. Anda akan diarahkan ke chat WhatsApp customer
-			service kami.
-		</p>
-
-		<form>
-			<div class="row mb-3">
-				<div class="col-md-6 mb-3 mb-md-0">
-					<div class="form-group">
-						<label for="name">Nama</label>
-						<input
-							type="text"
-							class="form-control"
-							name="name"
-							placeholder="Nama Anda"
-						/>
-					</div>
-				</div>
-				<div class="col-md-6"></div>
-			</div>
-
-			<div class="form-group mb-3">
-				<label for="subject">Pertanyaan / Kritik / Saran / Pengaduan</label>
-				<input
-					type="text"
-					class="form-control"
-					name="subject"
-					placeholder="Pertanyaan / Kritik / Saran / Pengaduan"
-				/>
-			</div>
-			<div class="form-group mb-50">
-				<label for="message">Isi Pesan</label>
-				<textarea
-					class="form-control"
-					name="message"
-					placeholder="Isi Pesan"
-					style="min-height: 140px"
-				></textarea>
-			</div>
-
-			<button
-				type="submit"
-				class="btn btn-lg btn-gradient-pearlgreen rounded-pill"
-			>
-				<i class="bi bi-whatsapp me-1"></i>
-				Chat WhatsApp
-			</button>
-		</form>
-	</div>
-</section>
+	</section>
+</div>
 
 {{#content "scripts" mode="prepend"}}
 	<script type="text/javascript" src="/plugins/select2/js/select2.full.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+	<script type="text/javascript">
+		{{!-- prettier-ignore --}}
+		function initHomeData() {
+			return {
+				redirectToWA(form) {
+					const uri = $(form).attr('action');
+
+					const formData = $(form).serializeArray();
+					const visitorName = formData.find(({ name }) => name === 'name')?.value;
+					const visitorMsgType = formData.find(({ name }) => name === 'message_type')?.value;
+					const visitorMsg = formData.find(({ name }) => name === 'message')?.value;
+
+					const text = `Hi admin, saya ${visitorName}.%0a%0a${visitorMsgType} terkait:%0a${visitorMsg}`;
+
+					window.location.href = `${uri}?text=${text}`;
+				}
+			};
+		}
+		{{!-- prettier-ignore --}}
+	</script>
 {{/content}}
