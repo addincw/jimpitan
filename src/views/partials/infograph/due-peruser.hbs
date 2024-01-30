@@ -52,9 +52,22 @@
 			<div class="mt-3 card card-body">
 				<form class="row g-3">
 					<div class="col-6 col-md-2">
+						<label for="dues_month" class="form-label"> Bulan </label>
+						<select
+							class="form-select select2 {{echoif (lookup errors.fieldErrors 'dues_month') 'is-invalid'}}"
+							name="dues_month"
+							width="100%"
+						>
+							<option value=""></option>
+							<template x-for="(month, monthIdx) in daysEachMonths">
+								<option x-bind:value="monthIdx + 1" x-text="month.month" />
+							</template>
+						</select>
+					</div>
+					<div class="col-6 col-md-2">
 						<label for="rw" class="form-label"> RW </label>
 						<select
-							class="form-control select2 {{echoif (lookup errors.fieldErrors 'community_assoc_id') 'is-invalid'}}"
+							class="form-select select2 {{echoif (lookup errors.fieldErrors 'community_assoc_id') 'is-invalid'}}"
 							name="community_assoc_id"
 							width="100%"
 						>
@@ -93,15 +106,11 @@
 			<thead>
 				<tr>
 					<th scope="col" class="column-sticky-left" rowspan="3">Warga</th>
-					<template x-for="month in daysEachMonths">
-						<th class="text-center" x-bind:colspan="month.days" x-text="month.month"></th>
-					</template>
+					<th class="text-center" x-bind:colspan="duesMonth.days" x-text="duesMonth.month"></th>
 				</tr>
 				<tr>
-					<template x-for="month in daysEachMonths">
-						<template x-for="i in month.days">
-							<th scope="col" class="text-center" x-text="i"></th>
-						</template>
+					<template x-for="day in duesMonth.days">
+						<th scope="col" class="text-center" x-text="day"></th>
 					</template>
 				</tr>
 			</thead>
@@ -112,15 +121,13 @@
 							<div class="fw-bold text-truncate" x-text="`${item.user.firstname} ${item.user.lastname}`"></div>
 							<span x-text="`${item.resident_assoc.name}, ${item.resident_assoc.community_assoc.name}`"></span>
 						</td>
-						<template x-for="(month, monthIdx) in daysEachMonths">
-							<template x-for="i in month.days">
-								<td
-									class="text-center"
-									x-bind:class="item.dues.includes(formatMonthDate(monthIdx + 1, i)) ? 'text-success' : 'text-light'"
-								>
-									<i class="bi bi-check-square-fill"></i>
-								</td>
-							</template>
+						<template x-for="day in duesMonth.days">
+							<td
+								class="text-center"
+								x-bind:class="item.dues.includes(formatMonthDate(day)) ? 'text-success' : 'text-light'"
+							>
+								<i class="bi bi-check-square-fill"></i>
+							</td>
 						</template>
 					</tr>
 				</template>
@@ -173,11 +180,13 @@
 		const currentMonthIndex = new Date().getMonth();
 		function initDuePerUserData() {
 			return {
-				daysEachMonths: [JSON.parse($('[name="daysEachMonths"]').val())[currentMonthIndex]],
+				daysEachMonths: JSON.parse($('[name="daysEachMonths"]').val()),
+				duesMonth: JSON.parse($('[name="daysEachMonths"]').val())[currentMonthIndex],
 				filters: {
 					communityAssocId: "",
 					residentAssocId: "",
 					q: "",
+					month: currentMonthIndex + 1,
 				},
 				data: [],
 				data_total: 0,
@@ -195,10 +204,22 @@
 				init() {
 					const root = this;
 
+					$('.due-peruser [name="dues_month"]').select2({ placeholder: "Pilih Bulan", allowClear: true });
+					$('.due-peruser [name="dues_month"]').change(function() {
+						root.filters.month = $(this).val();
+						root.duesMonth = root.daysEachMonths[$(this).val() - 1];
+					});
+					if (root.filters.month) {
+						setTimeout(() => {
+							$('.due-peruser [name="dues_month"]').val(root.filters.month).trigger("change");
+						}, 300);
+					}
+
 					$('.due-peruser [name="community_assoc_id"]').select2({ placeholder: "Pilih RW", allowClear: true });
 					$('.due-peruser [name="community_assoc_id"]').change(function() {
 						root.filters.communityAssocId = $(this).val();
 
+						root.filters.q = "";
 						$('.due-peruser [name="resident_assoc_id"]').val("").trigger("change");
 
 						const communityAssocId = $(this).val();
@@ -212,6 +233,7 @@
 					$('.due-peruser [name="resident_assoc_id"]').select2({ placeholder: "Pilih RT", allowClear: true });
 					$('.due-peruser [name="resident_assoc_id"]').change(function() {
 						root.filters.residentAssocId = $(this).val();
+						root.filters.q = "";
 					})
 
 					root.$watch('filters', () => root.fetchDataPerUser());
@@ -238,9 +260,12 @@
 					this.pagination.page_next = pagination.page_next;
 					this.pagination.page_total = pagination.page_total;
 				},
-				formatMonthDate(month, date) {
+				formatMonthDate(date) {
 					const datePrefixed = date < 10 ? `0${date}` : date;
-					const monthPrefixed = month < 10 ? `0${month}` : month;
+					const monthPrefixed = this.filters.month < 10 
+						? `0${this.filters.month}` 
+						: this.filters.month;
+
 					return `${monthPrefixed}-${datePrefixed}`;
 				},
 				getFilterQueries() {
@@ -253,6 +278,9 @@
 					}
 					if(this.filters.q) {
 						qParams.append('f.q', this.filters.q);
+					}
+					if(this.filters.month) {
+						qParams.append('f.month', this.filters.month);
 					}
 					return qParams;
 				},

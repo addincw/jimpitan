@@ -107,7 +107,10 @@ export async function getReportPerUser(req: Request, res: Response) {
 		const residentAssocDues = await ResidentAssocDue.findAll({
 			attributes: ["user_resident_id", [Sequelize.fn("date", Sequelize.col("date")), "date_dues"]],
 			where: {
-				[Op.and]: [Sequelize.literal(`EXTRACT(YEAR FROM date) = '${moment().format("YYYY")}'`)],
+				[Op.and]: [
+					Sequelize.literal(`EXTRACT(YEAR FROM date) = '${moment().format("YYYY")}'`),
+					Sequelize.literal(`MONTH(date) = '${req.query["f.month"] ?? 1}'`),
+				],
 				type: 0,
 				user_resident_id: {
 					[Op.in]: userResidents.rows.map((user) => user.toJSON().id as number),
