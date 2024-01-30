@@ -3,20 +3,11 @@ import { NextFunction, Request, Response } from "express";
 import { z } from "zod";
 import moment from "moment";
 
-import { make as hashMake } from "../../../helpers/hash.mjs";
 import { UserAttributes } from "../../../../database/models/models";
-import db from "../../../../database/models/index.cjs";
+import * as DuesReportService from "../../../services/DuesReportService.mjs";
 
-const {
-	sequelize,
-	CommunityAssoc,
-	ResidentAssoc,
-	ResidentAssocDue,
-	Role,
-	User,
-	UserResident,
-	UserFunctionary,
-} = db;
+import db from "../../../../database/models/index.cjs";
+const { sequelize, ResidentAssoc, ResidentAssocDue, User, UserResident, UserFunctionary } = db;
 
 const baseRoute = "/admin/dues/expense";
 const baseRouteView = baseRoute.replace(new RegExp("^/"), "");
@@ -71,6 +62,12 @@ export async function index(req: Request, res: Response, next: NextFunction) {
 	const offset = (page - 1) * perPage;
 
 	try {
+		const duesInOut = await DuesReportService.getReportInOut({
+			where: {
+				resident_assoc_id: userFunctionary.resident_assoc_id,
+			},
+		});
+
 		const data = await ResidentAssocDue.findAndCountAll({
 			where: {
 				...filterWheres,
@@ -114,6 +111,7 @@ export async function index(req: Request, res: Response, next: NextFunction) {
 
 		res.render(baseRouteView + "/index", {
 			title: "Pengeluaran Iuran",
+			dataInOut: duesInOut.data.length ? duesInOut.data[0] : {},
 			data: data.rows.map((row) => {
 				const flattenRow = row.toJSON();
 				return {
@@ -166,10 +164,7 @@ export async function store(req: Request, res: Response) {
 			...req.body,
 			amount: parseInt(req.body.amount),
 		});
-		const userResidentId =
-			req.body.user_resident_id !== ""
-				? parseInt(req.body.user_resident_id)
-				: null;
+		const userResidentId = req.body.user_resident_id !== "" ? parseInt(req.body.user_resident_id) : null;
 
 		const userFunctionary = await getUserFunctionaryLoggedIn(req.user);
 
@@ -262,10 +257,7 @@ export async function update(req: Request, res: Response) {
 			...req.body,
 			amount: parseInt(req.body.amount),
 		});
-		const userResidentId =
-			req.body.user_resident_id !== ""
-				? parseInt(req.body.user_resident_id)
-				: null;
+		const userResidentId = req.body.user_resident_id !== "" ? parseInt(req.body.user_resident_id) : null;
 
 		await data.update({
 			...validFormData,
