@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "concurrently \"rm -rf dist\" \"npm run tsc\" \"npm run copyfiles\"",
-    "dev": "concurrently \"rm -rf dist\" \"npm run copyfiles\" \"tsc --watch\" \"npm run copyfiles:watch\" \"nodemon dist/app.mjs\"",
+    "dev": "rm -rf dist && npm run copyfiles && npm run tsc && concurrently \"tsc --watch\" \"npm run copyfiles:watch\" \"nodemon dist/app.mjs\"",
     "start": "node dist/app.mjs",
     "test": "echo \"Error: no test specified\" && exit 1",
     "tsc": "tsc -p tsconfig.json",

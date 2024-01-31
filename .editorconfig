@@ -1,7 +1,13 @@
 root = true
 
+[*.{json}]
+indent_style = space
+indent_size = 2
+insert_final_newline = false
+end_of_line = crlf
+
 [*]
 charset = utf-8
 indent_style = tab
 insert_final_newline = true
-trim_trailling_whitespace = true
+trim_trailing_whitespace = true
