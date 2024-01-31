@@ -3,7 +3,25 @@
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<meta name="robots" content="noindex, nofollow" />
-		<title>{{title}}{{#if appName}} | {{/if}}{{appName}}</title>
+		<title>{{title}}{{echoif appName " | "}}{{appName}}</title>
+		<link rel="apple-touch-icon" href="/img/apple-touch-icon.png" sizes="180x180" />
+		<link rel="icon" href="/img/favicon.ico" />
+		<link rel="icon" href="/img/favicon-16x16.png" sizes="16x16" type="image/png" />
+		<link rel="icon" href="/img/favicon-32x32.png" sizes="32x32" type="image/png" />
+		<meta name="author" content="Kelurahan Pekauman, Kecamatan Sidoarjo, Kabupaten Sidoarjo" />
+		<meta
+			name="description"
+			content="Aplikasi RT, RW, kelurahan Pekauman, kecamatan Sidoarjo. Kabupaten Sidoarjo. untuk mengelola dan pelaporan hasil jimpitan warga, melanjutkan kearifan lokal dengan pemanfaatan teknologi."
+		/>
+		<meta property="og:title" content="{{title}}{{echoif appName ' | '}}{{appName}}" />
+		<meta
+			property="og:description"
+			content="Aplikasi RT, RW, kelurahan Pekauman, kecamatan Sidoarjo. Kabupaten Sidoarjo. untuk mengelola dan pelaporan hasil jimpitan warga, melanjutkan kearifan lokal dengan pemanfaatan teknologi."
+		/>
+		<meta property="og:image" content="https://jimpitman.my.id/img/logo-sda.png" />
+		<meta property="og:image:type" content="image/png" />
+		<meta property="og:image:width" content="300" />
+		<meta property="og:image:height" content="271" />
 		<link rel="stylesheet" href="/plugins/fontawesome-free/css/all.min.css" />
 		<link rel="stylesheet" href="/plugins/sweetalert2/sweetalert2.min.css" />
 		{{#block "styles"}}{{/block}}
@@ -23,6 +41,7 @@
 					<li class="nav-item">
 						<a class="nav-link" data-widget="pushmenu" href="#" role="button">
 							<i class="fas fa-bars"></i>
+							<div class="d-inline-block ml-2 ml-md-0 d-md-none"><b>{{appName}}</b>Admin</div>
 						</a>
 					</li>
 				</ul>
@@ -30,7 +49,7 @@
 				<!-- Right navbar links -->
 				<ul class="navbar-nav ml-auto">
 					<li class="nav-item">
-						<form action="/admin/logout" method="POST">
+						<form action="/admin/logout" method="POST" style="margin-bottom: 4px;">
 							{{{method "PUT"}}}
 							<button class="btn btn-link nav-link" type="submit">
 								Logout

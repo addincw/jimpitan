@@ -2,7 +2,25 @@
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<title>{{title}}{{#if appName}} | {{/if}}{{appName}}</title>
+		<title>{{title}}{{echoif appName " | "}}{{appName}}</title>
+		<link rel="apple-touch-icon" href="/img/apple-touch-icon.png" sizes="180x180" />
+		<link rel="icon" href="/img/favicon.ico" />
+		<link rel="icon" href="/img/favicon-16x16.png" sizes="16x16" type="image/png" />
+		<link rel="icon" href="/img/favicon-32x32.png" sizes="32x32" type="image/png" />
+		<meta name="author" content="Kelurahan Pekauman, Kecamatan Sidoarjo, Kabupaten Sidoarjo" />
+		<meta
+			name="description"
+			content="Aplikasi RT, RW, kelurahan Pekauman, kecamatan Sidoarjo. Kabupaten Sidoarjo. untuk mengelola dan pelaporan hasil jimpitan warga, melanjutkan kearifan lokal dengan pemanfaatan teknologi."
+		/>
+		<meta property="og:title" content="{{title}}{{echoif appName ' | '}}{{appName}}" />
+		<meta
+			property="og:description"
+			content="Aplikasi RT, RW, kelurahan Pekauman, kecamatan Sidoarjo. Kabupaten Sidoarjo. untuk mengelola dan pelaporan hasil jimpitan warga, melanjutkan kearifan lokal dengan pemanfaatan teknologi."
+		/>
+		<meta property="og:image" content="https://jimpitman.my.id/img/logo-sda.png" />
+		<meta property="og:image:type" content="image/png" />
+		<meta property="og:image:width" content="300" />
+		<meta property="og:image:height" content="271" />
 		<link rel="stylesheet" href="/css/gradfull-theme.css" />
 		{{#block "styles"}}{{/block}}
 		{{!-- prettier-ignore --}}
@@ -26,13 +44,22 @@
 				.pagination .page-item a.page-link.disabled {
 					cursor: pointer;
 				}
+
+				@media (min-width: 375px) {
+					.w-sm-auto {
+						width: auto !important;
+					}
+				}
 		</style>
 		{{!-- prettier-ignore --}}
 	</head>
 	<body class="home">
 		<nav class="navbar navbar-transparent navbar-expand-lg">
 			<div class="container">
-				<a class="navbar-brand brand-title" href="/">{{appName}}</a>
+				<a class="navbar-brand brand-title d-flex align-items-center" href="/">
+					<img src="/img/logo-sda.png" alt="Logo" width="48" height="43" class="d-inline-block align-text-top me-2" />
+					{{appName}}
+				</a>
 				<!-- desktop only -->
 				<div class="d-none d-lg-block flex-grow-0">
 					<div class="navbar-nav">
