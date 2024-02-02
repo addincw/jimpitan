@@ -61,6 +61,13 @@ app.use("/", routeFronts);
 app.use("/api", routeAPIs);
 app.use("/admin", routeAdmins);
 
+if (process.env.NODE_ENV === "production") {
+	app.use((err: Error, req: Request, res: Response) => {
+		req.logger.error(err.stack);
+		res.status(500).render("front/error", { layout: false, title: "Kesalahan Server" });
+	});
+}
+
 app.listen(process.env.APP_PORT, () => {
 	console.log(`${process.env.APP_NAME} app is running on ${process.env.APP_URL}:${process.env.APP_PORT}`);
 });
