@@ -6,10 +6,14 @@ import passport from "passport";
 import path from "path";
 import session from "express-session";
 
+import logger from "../config/logger.cjs";
+
 import viewEngine, { viewDir, viewExtFile } from "./config/view.mjs";
 
+import customErrorHandler from "./middlewares/customErrorHandler.mjs";
 import flashParser from "./middlewares/flashParser.mjs";
 import methodOverride from "./middlewares/methodOverride.mjs";
+
 import routeAdmins from "./routes/route-admin.mjs";
 import routeAPIs from "./routes/route-api.mjs";
 import routeFronts from "./routes/route-front.mjs";
@@ -34,6 +38,8 @@ app.use(passport.authenticate("session"));
 
 // define global variables
 app.use((req: Request, res: Response, next) => {
+	req.logger = logger;
+
 	if (["POST", "PUT"].includes(req.method) && Object.keys(req.body).length) {
 		req.session.old = JSON.stringify(req.body);
 	} else if (req.session.old) {
@@ -55,6 +61,8 @@ app.use((req: Request, res: Response, next) => {
 app.use("/", routeFronts);
 app.use("/api", routeAPIs);
 app.use("/admin", routeAdmins);
+
+app.use(customErrorHandler());
 
 app.listen(process.env.APP_PORT, () => {
 	console.log(`${process.env.APP_NAME} app is running on ${process.env.APP_URL}:${process.env.APP_PORT}`);
