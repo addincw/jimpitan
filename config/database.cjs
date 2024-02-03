@@ -1,5 +1,7 @@
 require("dotenv/config");
 
+const logger = require("./logger.cjs");
+
 module.exports = {
 	development: {
 		username: process.env.DB_USERNAME,
@@ -21,5 +23,6 @@ module.exports = {
 		database: process.env.DB_DATABASE,
 		host: process.env.DB_HOST,
 		dialect: process.env.DB_CONNECTION ?? "mysql",
+		logging: (msg) => logger.info(msg),
 	},
 };
