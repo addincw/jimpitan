@@ -10,6 +10,7 @@ import logger from "../config/logger.cjs";
 
 import viewEngine, { viewDir, viewExtFile } from "./config/view.mjs";
 
+import customErrorHandler from "./middlewares/customErrorHandler.mjs";
 import flashParser from "./middlewares/flashParser.mjs";
 import methodOverride from "./middlewares/methodOverride.mjs";
 
@@ -61,12 +62,7 @@ app.use("/", routeFronts);
 app.use("/api", routeAPIs);
 app.use("/admin", routeAdmins);
 
-if (process.env.NODE_ENV === "production") {
-	app.use((err: Error, req: Request, res: Response) => {
-		req.logger.error(err.stack);
-		res.status(500).render("front/error", { layout: false, title: "Kesalahan Server" });
-	});
-}
+app.use(customErrorHandler());
 
 app.listen(process.env.APP_PORT, () => {
 	console.log(`${process.env.APP_NAME} app is running on ${process.env.APP_URL}:${process.env.APP_PORT}`);
