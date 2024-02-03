@@ -4,7 +4,6 @@ import express, { Request, Response } from "express";
 import flash from "connect-flash";
 import passport from "passport";
 import path from "path";
-import session from "express-session";
 
 import logger from "../config/logger.cjs";
 
@@ -13,6 +12,7 @@ import viewEngine, { viewDir, viewExtFile } from "./config/view.mjs";
 import customErrorHandler from "./middlewares/customErrorHandler.mjs";
 import flashParser from "./middlewares/flashParser.mjs";
 import methodOverride from "./middlewares/methodOverride.mjs";
+import session from "./middlewares/session.mjs";
 
 import routeAdmins from "./routes/route-admin.mjs";
 import routeAPIs from "./routes/route-api.mjs";
@@ -31,7 +31,7 @@ app.set("views", path.join(__dirname + viewDir));
 app.use(express.urlencoded({ extended: false }));
 app.use(methodOverride());
 app.use(express.static("public"));
-app.use(session({ secret: "candi", resave: false, saveUninitialized: false }));
+app.use(session());
 app.use(flash());
 app.use(flashParser());
 app.use(passport.authenticate("session"));

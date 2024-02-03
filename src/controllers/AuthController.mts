@@ -12,7 +12,8 @@ export function authenticate(req: Request, res: Response) {
 }
 
 export function logout(req: Request, res: Response, next: NextFunction) {
-	req.logout((err) => {
+	// TODO: session still not removing from db
+	req.session.destroy((err) => {
 		if (err) return next(err);
 
 		res.redirect("admin/login");
