@@ -13,7 +13,7 @@ module.exports = {
 					updated_at: new Date(),
 				},
 				{
-					name: "Functionary",
+					name: "Functionary (Kolektor Iuran)",
 					slug: "functionary",
 					created_at: new Date(),
 					updated_at: new Date(),
