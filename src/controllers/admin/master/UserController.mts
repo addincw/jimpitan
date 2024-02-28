@@ -1,4 +1,4 @@
-import { Identifier, Op } from "sequelize";
+import { Op, ValidationError } from "sequelize";
 import { NextFunction, Request, Response } from "express";
 import { z } from "zod";
 import moment from "moment";
@@ -7,15 +7,7 @@ import { generateRandomString } from "../../../helpers/string.mjs";
 import { make as hashMake } from "../../../helpers/hash.mjs";
 import db from "../../../../database/models/index.cjs";
 
-const {
-	sequelize,
-	CommunityAssoc,
-	ResidentAssoc,
-	Role,
-	User,
-	UserResident,
-	UserFunctionary,
-} = db;
+const { sequelize, CommunityAssoc, ResidentAssoc, Role, User, UserFunctionary } = db;
 
 const baseRoute = "/admin/master/users";
 const baseRouteView = baseRoute.replace(new RegExp("^/"), "");
@@ -49,22 +41,17 @@ function buildWhereCondition(filters: {
 	}
 
 	if (filters.communityAssocId) {
-		whereCondition["$user_functionary.resident_assoc.community_assoc.id$"] =
-			filters.communityAssocId;
+		whereCondition["$user_functionary.resident_assoc.community_assoc.id$"] = filters.communityAssocId;
 	}
 
 	if (filters.residentAssocId) {
-		whereCondition["$user_functionary.resident_assoc_id$"] =
-			filters.residentAssocId;
+		whereCondition["$user_functionary.resident_assoc_id$"] = filters.residentAssocId;
 	}
 
 	if (filters.q) {
 		whereCondition = {
 			...whereCondition,
-			[Op.or]: [
-				{ firstname: { [Op.like]: `%${filters.q}%` } },
-				{ lastname: { [Op.like]: `%${filters.q}%` } },
-			],
+			[Op.or]: [{ firstname: { [Op.like]: `%${filters.q}%` } }, { lastname: { [Op.like]: `%${filters.q}%` } }],
 		};
 	}
 
@@ -91,11 +78,23 @@ function validateByRole(roleId: number, fields: Record<string, any>) {
 				message: "username is required for administrator",
 				path: ["username"],
 			});
+		} else {
+			if (fields.username.length < 4) {
+				errors.push({
+					code: "custom",
+					message: "username min characters length is 4",
+					path: ["username"],
+				});
+			}
+			if (/[^a-zA-Z0-9]/.test(fields.username)) {
+				errors.push({
+					code: "custom",
+					message: "not allowed special characters and whitespace",
+					path: ["username"],
+				});
+			}
 		}
-		if (
-			!fields.password &&
-			(!fields.id || (fields.id && fields.req_change_password))
-		) {
+		if (!fields.password && (!fields.id || (fields.id && fields.req_change_password))) {
 			errors.push({
 				code: "custom",
 				message: "password is required for administrator",
@@ -122,12 +121,8 @@ function validateByRole(roleId: number, fields: Record<string, any>) {
 export async function index(req: Request, res: Response, next: NextFunction) {
 	const filters = {
 		roleId: req.query["f.ri"] ? parseInt(req.query["f.ri"] as string) : 0,
-		communityAssocId: req.query["f.cai"]
-			? parseInt(req.query["f.cai"] as string)
-			: 0,
-		residentAssocId: req.query["f.rai"]
-			? parseInt(req.query["f.rai"] as string)
-			: 0,
+		communityAssocId: req.query["f.cai"] ? parseInt(req.query["f.cai"] as string) : 0,
+		residentAssocId: req.query["f.rai"] ? parseInt(req.query["f.rai"] as string) : 0,
 		q: req.query["f.q"] ? (req.query["f.q"] as string) : "",
 	};
 
@@ -255,6 +250,14 @@ export async function store(req: Request, res: Response) {
 		if (error instanceof z.ZodError) {
 			req.flash("error", `gagal menyimpan data, periksa ulang form`);
 			req.flash("errorPayload", JSON.stringify(error.flatten()));
+		} else if (error instanceof ValidationError) {
+			const flattenErrors = { formErrors: [], fieldErrors: {} };
+			error.errors.forEach((err) => {
+				flattenErrors.fieldErrors[err.path] = [err.message];
+			});
+
+			req.flash("error", `gagal menyimpan data, periksa ulang form`);
+			req.flash("errorPayload", JSON.stringify(flattenErrors));
 		} else {
 			req.flash("error", `gagal menyimpan data: ${error.message}`);
 		}
@@ -369,6 +372,14 @@ export async function update(req: Request, res: Response) {
 		if (error instanceof z.ZodError) {
 			req.flash("error", `gagal menyimpan data, periksa ulang form`);
 			req.flash("errorPayload", JSON.stringify(error.flatten()));
+		} else if (error instanceof ValidationError) {
+			const flattenErrors = { formErrors: [], fieldErrors: {} };
+			error.errors.forEach((err) => {
+				flattenErrors.fieldErrors[err.path] = [err.message];
+			});
+
+			req.flash("error", `gagal menyimpan data, periksa ulang form`);
+			req.flash("errorPayload", JSON.stringify(flattenErrors));
 		} else {
 			req.flash("error", `gagal menyimpan data: ${error.message}`);
 		}

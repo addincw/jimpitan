@@ -188,11 +188,14 @@
                         setTimeout(initResidentialFields, 300);
                     }
 
+                    // determine if form load in edit page
                     if ($('[name="id"]').val()) {
                         root.isEditUserForm = true;
                         if ($('[name="init.req_change_password"]').val()) {
                             root.reqChangePassword = true;
                         }
+                    } else {
+                        root.reqChangePassword = true;
                     }
 
                     root.$watch('selectedRoleId', function (value) {
