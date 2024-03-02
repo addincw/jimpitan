@@ -5,13 +5,7 @@ import moment from "moment";
 import { UserAttributes } from "../../../../database/models/models";
 import db from "../../../../database/models/index.cjs";
 
-const {
-	Sequelize,
-	ResidentAssoc,
-	ResidentAssocDue,
-	UserFunctionary,
-	UserResident,
-} = db;
+const { Sequelize, ResidentAssoc, ResidentAssocDue, UserFunctionary, UserResident } = db;
 
 const baseRoute = "/admin/dues/income";
 const baseRouteView = baseRoute.replace(new RegExp("^/"), "");
@@ -42,10 +36,7 @@ function genWhereByFilters(query: Record<string, any>) {
 	if (q) {
 		wheres = {
 			...wheres,
-			[Op.or]: [
-				{ "$user.firstname$": { [Op.like]: `%${q}%` } },
-				{ "$user.lastname$": { [Op.like]: `%${q}%` } },
-			],
+			[Op.or]: [{ "$user.firstname$": { [Op.like]: `%${q}%` } }, { "$user.lastname$": { [Op.like]: `%${q}%` } }],
 		};
 	}
 
@@ -88,11 +79,7 @@ export async function index(req: Request, res: Response, next: NextFunction) {
 					required: filters.status === "1",
 					where: {
 						date: {
-							[Op.and]: [
-								Sequelize.literal(
-									`DATE(date) = '${moment().format("YYYY-MM-DD")}'`
-								),
-							],
+							[Op.and]: [Sequelize.literal(`DATE(date) = '${moment().format("YYYY-MM-DD")}'`)],
 						},
 					},
 				},
@@ -144,20 +131,17 @@ export async function store(req: Request, res: Response) {
 				resident_assoc_id: userFunctionary.resident_assoc_id,
 				user_resident_id: id,
 				date: {
-					[Op.and]: [
-						Sequelize.literal(
-							`DATE(date) = '${moment().format("YYYY-MM-DD")}'`
-						),
-					],
+					[Op.and]: [Sequelize.literal(`DATE(date) = '${moment().format("YYYY-MM-DD")}'`)],
 				},
 			},
 			raw: true,
 		});
 
 		if (!todayDues) {
-			const date = moment().format("YYYY-MM-DD HH:mm:ss");
-
 			// TODO: timezone client (+7) and server different, need some adjustment for storing data
+			// temporary fix, with adding +7 before store
+			const date = moment().add(7, "hours").format("YYYY-MM-DD HH:mm:ss");
+
 			const dueCreated = await ResidentAssocDue.create({
 				resident_assoc_id: userFunctionary.resident_assoc_id,
 				user_resident_id: parseInt(id),
@@ -165,16 +149,14 @@ export async function store(req: Request, res: Response) {
 				amount: 500,
 				description: "iuran jimpitan",
 				type: 0, // in,
-				date: moment().format("YYYY-MM-DD HH:mm:ss"),
+				date,
 			});
-
-			console.log("due time", date, dueCreated.get("date"));
 		}
 
-		req.flash("success", "data berhasil tersimpan");
+		req.flash("success", "iuran telah tersimpan");
 		res.redirect(baseRoute + "/");
 	} catch (error) {
-		req.flash("error", `gagal menyimpan data: ${error.message}`);
+		req.flash("error", `gagal mencatat iuran: ${error.message}`);
 		res.redirect(baseRoute + "/");
 	}
 }
