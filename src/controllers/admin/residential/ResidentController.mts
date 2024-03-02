@@ -5,8 +5,9 @@ import moment from "moment";
 
 import { generateRandomString } from "../../../helpers/string.mjs";
 import { make as hashMake } from "../../../helpers/hash.mjs";
-import db from "../../../../database/models/index.cjs";
+import { ROLE_FUNCTIONARY, ROLE_RESIDENT, getUserFunctionaryLoggedIn } from "../../../services/UserService.mjs";
 
+import db from "../../../../database/models/index.cjs";
 const { sequelize, CommunityAssoc, ResidentAssoc, User, UserResident } = db;
 
 const baseRoute = "/admin/residential/residents";
@@ -18,33 +19,42 @@ const residentFormSchema = z.object({
 	address: z.string().min(10),
 	phone: z
 		.string()
-		.min(12)
+		.min(11)
 		.refine((value) => /^[0-9]+$/.test(value), {
 			message: "Value must be a number",
-		}),
+		})
+		.nullable(),
 	resident_assoc_id: z.number().min(1),
 });
 
 export { baseRoute, baseRouteView };
 
-function buildWhereCondition(filters: {
-	communityAssocId: number;
-	residentAssocId: number;
-	q: string;
-}) {
+async function genWhereByFilters(req: Request) {
+	const { user, query } = req;
+
+	const filters = {
+		communityAssocId: query["f.cai"] ? parseInt(query["f.cai"] as string) : 0,
+		residentAssocId: query["f.rai"] ? parseInt(query["f.rai"] as string) : 0,
+		q: query["f.q"] ? (query["f.q"] as string) : "",
+	};
+
+	if (user.role_id === ROLE_FUNCTIONARY) {
+		const userFunctionary = await getUserFunctionaryLoggedIn(user);
+
+		filters.communityAssocId = userFunctionary.resident_assoc.community_assoc_id;
+		filters.residentAssocId = userFunctionary.resident_assoc_id;
+	}
+
 	let whereCondition: Record<string, any> = {};
 
 	if (filters.communityAssocId) {
-		whereCondition["$resident_assoc.community_assoc.id$"] =
-			filters.communityAssocId;
+		whereCondition["$resident_assoc.community_assoc.id$"] = filters.communityAssocId;
 	}
-
 	if (filters.residentAssocId) {
 		whereCondition.resident_assoc_id = {
 			[Op.eq]: filters.residentAssocId,
 		};
 	}
-
 	if (filters.q) {
 		whereCondition = {
 			...whereCondition,
@@ -55,19 +65,11 @@ function buildWhereCondition(filters: {
 		};
 	}
 
-	return whereCondition;
+	return { filters, wheres: whereCondition };
 }
 
 export async function index(req: Request, res: Response, next: NextFunction) {
-	const filters = {
-		communityAssocId: req.query["f.cai"]
-			? parseInt(req.query["f.cai"] as string)
-			: 0,
-		residentAssocId: req.query["f.rai"]
-			? parseInt(req.query["f.rai"] as string)
-			: 0,
-		q: req.query["f.q"] ? (req.query["f.q"] as string) : "",
-	};
+	const { filters, wheres: filterWheres } = await genWhereByFilters(req);
 
 	const page = req.query.p ? parseInt(req.query.p as string) : 1;
 	const perPage = req.query.pp ? parseInt(req.query.pp as string) : 10;
@@ -78,7 +80,7 @@ export async function index(req: Request, res: Response, next: NextFunction) {
 
 	try {
 		const data = await UserResident.findAndCountAll({
-			where: buildWhereCondition(filters),
+			where: filterWheres,
 			include: [
 				"user",
 				{
@@ -129,12 +131,14 @@ export async function index(req: Request, res: Response, next: NextFunction) {
 
 export async function create(req: Request, res: Response) {
 	const communityAssocs = await CommunityAssoc.findAll();
+	const editableResidentAssoc = req.user.role_id !== ROLE_FUNCTIONARY;
 
 	res.render(baseRouteView + "/create", {
 		title: "Tambah Kepala Keluarga (KK)",
 		communityAssocs: communityAssocs.map((row) => {
 			return row.toJSON();
 		}),
+		editableResidentAssoc,
 	});
 }
 
@@ -142,10 +146,17 @@ export async function store(req: Request, res: Response) {
 	const dbTransaction = await sequelize.transaction();
 
 	try {
+		let inputResidentAssocId = req.body.resident_assoc_id;
+		if (req.user.role_id === ROLE_FUNCTIONARY) {
+			const userFunctionary = await getUserFunctionaryLoggedIn(req.user);
+			inputResidentAssocId = userFunctionary.resident_assoc_id;
+		}
+
 		const validFormData = residentFormSchema.parse({
 			...req.body,
 			user_id: parseInt(req.body.user_id),
-			resident_assoc_id: parseInt(req.body.resident_assoc_id),
+			resident_assoc_id: parseInt(inputResidentAssocId),
+			phone: req.body.phone !== "" ? req.body.phone : null,
 		});
 
 		const { firstname, lastname, phone, ...userResidentData } = validFormData;
@@ -158,7 +169,7 @@ export async function store(req: Request, res: Response) {
 			phone,
 			username: genUsername,
 			password: genPassword,
-			role_id: 3, // resident = 3
+			role_id: ROLE_RESIDENT,
 		});
 
 		await UserResident.create({
@@ -188,6 +199,8 @@ export async function edit(req: Request, res: Response) {
 	const { id } = req.params;
 
 	const communityAssocs = await CommunityAssoc.findAll();
+	const editableResidentAssoc = req.user.role_id !== ROLE_FUNCTIONARY;
+
 	const data = await UserResident.findByPk(id, {
 		include: [
 			"user",
@@ -200,8 +213,7 @@ export async function edit(req: Request, res: Response) {
 	});
 
 	const userResidentData = data.toJSON();
-	const fullname =
-		userResidentData.user.firstname + " " + userResidentData.user.lastname;
+	const fullname = userResidentData.user.firstname + " " + userResidentData.user.lastname;
 
 	res.render(baseRouteView + "/edit", {
 		title: "Edit Kepala Keluarga (KK): " + fullname,
@@ -217,6 +229,7 @@ export async function edit(req: Request, res: Response) {
 		communityAssocs: communityAssocs.map((row) => {
 			return row.toJSON();
 		}),
+		editableResidentAssoc,
 	});
 }
 
@@ -226,12 +239,19 @@ export async function update(req: Request, res: Response) {
 	const dbTransaction = await sequelize.transaction();
 
 	try {
+		let inputResidentAssocId = req.body.resident_assoc_id;
+		if (req.user.role_id === ROLE_FUNCTIONARY) {
+			const userFunctionary = await getUserFunctionaryLoggedIn(req.user);
+			inputResidentAssocId = userFunctionary.resident_assoc_id;
+		}
+
 		const data = await UserResident.findByPk(id);
 
 		const validFormData = residentFormSchema.parse({
 			...req.body,
 			user_id: parseInt(req.body.user_id),
-			resident_assoc_id: parseInt(req.body.resident_assoc_id),
+			resident_assoc_id: parseInt(inputResidentAssocId),
+			phone: req.body.phone !== "" ? req.body.phone : null,
 		});
 
 		const { firstname, lastname, phone, ...userResidentData } = validFormData;
@@ -274,13 +294,11 @@ export async function destroy(req: Request, res: Response) {
 	const dbTransaction = await sequelize.transaction();
 
 	try {
-		const data = await UserResident.findByPk(id, { include: ["user"] });
+		const data = await UserResident.findByPk(id);
 
 		if (data) {
-			const user = ((data as typeof data) && { user: User }).user;
-
-			data.destroy();
-			user.destroy();
+			await data.destroy();
+			await User.destroy({ where: { id: data.toJSON().user_id } });
 		}
 
 		await dbTransaction.commit();
@@ -289,7 +307,7 @@ export async function destroy(req: Request, res: Response) {
 	} catch (error) {
 		await dbTransaction.rollback();
 
-		req.flash("error", `gagal menghapus data: ${error.message}`);
+		req.flash("error", `gagal menghapus data: kk memiliki riwayat iuran yang telah tercatat`);
 	}
 
 	res.redirect(baseRoute + "/");

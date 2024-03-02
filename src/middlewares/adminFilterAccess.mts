@@ -9,7 +9,7 @@ export default function adminFilterAccess(): RequestHandler {
 
 	const menuAccess = {
 		1: "^/(master|residential)/.*",
-		2: "^/dues/.*",
+		2: "^/(residential/residents|dues)(/.*)*",
 	};
 
 	return (req: Request, res: Response, next: NextFunction) => {
@@ -29,9 +29,7 @@ export default function adminFilterAccess(): RequestHandler {
 		}
 
 		const user = req.user as UserAttributes;
-		const roleHasMenuAccess = new RegExp(menuAccess[user.role_id] ?? "").test(
-			req.url
-		);
+		const roleHasMenuAccess = new RegExp(menuAccess[user.role_id] ?? "").test(req.url);
 
 		if (!publicRoutes.includes(req.url) && !roleHasMenuAccess) {
 			return res.redirect("back");

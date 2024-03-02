@@ -6,32 +6,34 @@
 <input type="hidden" name="init.resident_assoc_id" value="{{optional (lookup ./old 'resident_assoc_id') (lookup ./formData 'resident_assoc_id')}}">
 
 <div x-data="initFormData()">
-    <div class="form-group">
-        <label>Rukun Warga (RW)</label>
-        <select
-            class="form-control select2 {{echoif (lookup errors.fieldErrors 'community_assoc_id') 'is-invalid'}}"
-            name="community_assoc_id"
-        >
-            <option value=""></option>
-            {{#each communityAssocs as |communityAssoc|}}
-                <option value="{{communityAssoc.id}}">{{communityAssoc.name}}</option>
-            {{/each}}
-        </select>
-        {{> form/invalid-feedback fieldName="community_assoc_id"}}
-    </div>
+    {{#if editableResidentAssoc}}
+        <div class="form-group">
+            <label>Rukun Warga (RW)</label>
+            <select
+                class="form-control select2 {{echoif (lookup errors.fieldErrors 'community_assoc_id') 'is-invalid'}}"
+                name="community_assoc_id"
+            >
+                <option value=""></option>
+                {{#each communityAssocs as |communityAssoc|}}
+                    <option value="{{communityAssoc.id}}">{{communityAssoc.name}}</option>
+                {{/each}}
+            </select>
+            {{> form/invalid-feedback fieldName="community_assoc_id"}}
+        </div>
 
-    <div class="form-group">
-        <label>Rukun Tetangga (RT)</label>
-        <select
-            class="form-control select2 {{echoif (lookup errors.fieldErrors 'resident_assoc_id') 'is-invalid'}}"
-            name="resident_assoc_id"
-        >
-            <option value=""></option>
-        </select>
-        {{> form/invalid-feedback fieldName="resident_assoc_id"}}
-    </div>
+        <div class="form-group">
+            <label>Rukun Tetangga (RT)</label>
+            <select
+                class="form-control select2 {{echoif (lookup errors.fieldErrors 'resident_assoc_id') 'is-invalid'}}"
+                name="resident_assoc_id"
+            >
+                <option value=""></option>
+            </select>
+            {{> form/invalid-feedback fieldName="resident_assoc_id"}}
+        </div>
 
-    <hr>
+        <hr>
+    {{/if}}
 
     <h5 class="mb-3">Identitas Kepala Keluarga</h5>
 
