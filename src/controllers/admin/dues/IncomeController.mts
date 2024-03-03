@@ -2,9 +2,9 @@ import { NextFunction, Request, Response } from "express";
 import { Op } from "sequelize";
 import moment from "moment";
 
-import { UserAttributes } from "../../../../database/models/models";
-import db from "../../../../database/models/index.cjs";
+import { getUserFunctionaryLoggedIn } from "../../../services/UserService.mjs";
 
+import db from "../../../../database/models/index.cjs";
 const { Sequelize, ResidentAssoc, ResidentAssocDue, UserFunctionary, UserResident } = db;
 
 const baseRoute = "/admin/dues/income";
@@ -12,19 +12,6 @@ const baseRouteView = baseRoute.replace(new RegExp("^/"), "");
 
 export { baseRoute, baseRouteView };
 
-async function getUserFunctionaryLoggedIn(userLoggedIn: Record<string, any>) {
-	const userFunctionary = await UserFunctionary.findOne({
-		where: { user_id: (userLoggedIn as UserAttributes).id },
-		include: [
-			{
-				model: ResidentAssoc,
-				as: "resident_assoc",
-				include: ["community_assoc"],
-			},
-		],
-	});
-	return userFunctionary.toJSON();
-}
 function genWhereByFilters(query: Record<string, any>) {
 	const q = query["f.q"] ? (query["f.q"] as string) : "";
 	const status = query["f.status"] ? (query["f.status"] as string) : "";
@@ -40,6 +27,13 @@ function genWhereByFilters(query: Record<string, any>) {
 		};
 	}
 
+	if (status) {
+		const operation = status === "1" ? Op.ne : Op.eq;
+		wheres["$resident_assoc_dues.date$"] = {
+			[operation]: null,
+		};
+	}
+
 	return { filters, wheres };
 }
 
@@ -50,6 +44,24 @@ export async function index(req: Request, res: Response, next: NextFunction) {
 	const communityAssoc = userFunctionary.resident_assoc.community_assoc;
 
 	const { filters, wheres: filterWheres } = genWhereByFilters(req.query);
+	const relations = [
+		"user",
+		{
+			model: ResidentAssoc,
+			as: "resident_assoc",
+			include: ["community_assoc"],
+		},
+		{
+			model: ResidentAssocDue,
+			as: "resident_assoc_dues",
+			required: filters.status === "1",
+			where: {
+				date: {
+					[Op.and]: [Sequelize.literal(`DATE(date) = '${moment().format("YYYY-MM-DD")}'`)],
+				},
+			},
+		},
+	];
 
 	const page = req.query.p ? parseInt(req.query.p as string) : 1;
 
@@ -60,7 +72,7 @@ export async function index(req: Request, res: Response, next: NextFunction) {
 				...filterWheres,
 				resident_assoc_id: userFunctionary.resident_assoc_id,
 			},
-			include: ["user"],
+			include: relations,
 		});
 	} else {
 		perPage = parseInt(req.query.pp as string);
@@ -78,24 +90,7 @@ export async function index(req: Request, res: Response, next: NextFunction) {
 				...filterWheres,
 				resident_assoc_id: userFunctionary.resident_assoc_id,
 			},
-			include: [
-				"user",
-				{
-					model: ResidentAssoc,
-					as: "resident_assoc",
-					include: ["community_assoc"],
-				},
-				{
-					model: ResidentAssocDue,
-					as: "resident_assoc_dues",
-					required: filters.status === "1",
-					where: {
-						date: {
-							[Op.and]: [Sequelize.literal(`DATE(date) = '${moment().format("YYYY-MM-DD")}'`)],
-						},
-					},
-				},
-			],
+			include: relations,
 			order: [["created_at", "DESC"]],
 			limit: perPage,
 			offset,
