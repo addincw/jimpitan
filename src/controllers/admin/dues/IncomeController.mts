@@ -60,6 +60,7 @@ export async function index(req: Request, res: Response, next: NextFunction) {
 				...filterWheres,
 				resident_assoc_id: userFunctionary.resident_assoc_id,
 			},
+			include: ["user"],
 		});
 	} else {
 		perPage = parseInt(req.query.pp as string);
