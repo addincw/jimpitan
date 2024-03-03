@@ -1,10 +1,7 @@
 import { Response, Router } from "express";
 import passport from "passport";
 
-import authLocalStrategy, {
-	deserializeUser,
-	serializeUser,
-} from "../middlewares/authLocalStrategy.mjs";
+import authLocalStrategy, { deserializeUser, serializeUser } from "../middlewares/authLocalStrategy.mjs";
 import adminFilterAccess from "../middlewares/adminFilterAccess.mjs";
 
 import * as AuthController from "../controllers/AuthController.mjs";
@@ -40,20 +37,11 @@ router.put("/logout", AuthController.logout);
 router.get("/", DashboardController.index);
 
 router.get("/residential/community-assocs", CommunityAssocController.index);
-router.get(
-	"/residential/community-assocs/create",
-	CommunityAssocController.create
-);
+router.get("/residential/community-assocs/create", CommunityAssocController.create);
 router.post("/residential/community-assocs", CommunityAssocController.store);
 router.get("/residential/community-assocs/:id", CommunityAssocController.edit);
-router.put(
-	"/residential/community-assocs/:id",
-	CommunityAssocController.update
-);
-router.delete(
-	"/residential/community-assocs/:id",
-	CommunityAssocController.destroy
-);
+router.put("/residential/community-assocs/:id", CommunityAssocController.update);
+router.delete("/residential/community-assocs/:id", CommunityAssocController.destroy);
 
 router.use((_, res: Response, next) => {
 	res.locals.baseRoute = ResidentAssocController.baseRoute;
@@ -61,17 +49,11 @@ router.use((_, res: Response, next) => {
 	next();
 });
 router.get("/residential/resident-assocs", ResidentAssocController.index);
-router.get(
-	"/residential/resident-assocs/create",
-	ResidentAssocController.create
-);
+router.get("/residential/resident-assocs/create", ResidentAssocController.create);
 router.post("/residential/resident-assocs", ResidentAssocController.store);
 router.get("/residential/resident-assocs/:id", ResidentAssocController.edit);
 router.put("/residential/resident-assocs/:id", ResidentAssocController.update);
-router.delete(
-	"/residential/resident-assocs/:id",
-	ResidentAssocController.destroy
-);
+router.delete("/residential/resident-assocs/:id", ResidentAssocController.destroy);
 
 router.use((_, res: Response, next) => {
 	res.locals.baseRoute = ResidentController.baseRoute;
@@ -106,6 +88,7 @@ router.use((_, res: Response, next) => {
 });
 router.get("/dues/income", IncomeController.index);
 router.put("/dues/income/:id", IncomeController.store);
+router.delete("/dues/income/:id", IncomeController.destroy);
 
 router.use((_, res: Response, next) => {
 	res.locals.baseRoute = ExpenseController.baseRoute;

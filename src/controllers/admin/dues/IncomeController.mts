@@ -171,3 +171,31 @@ export async function store(req: Request, res: Response) {
 		res.redirect(baseRoute + "/");
 	}
 }
+
+export async function destroy(req: Request, res: Response) {
+	const { id } = req.params;
+
+	const userFunctionary = await getUserFunctionaryLoggedIn(req.user);
+
+	try {
+		const todayDues = await ResidentAssocDue.findOne({
+			where: {
+				resident_assoc_id: userFunctionary.resident_assoc_id,
+				user_resident_id: id,
+				date: {
+					[Op.and]: [Sequelize.literal(`DATE(date) = '${moment().format("YYYY-MM-DD")}'`)],
+				},
+			},
+		});
+
+		if (todayDues) {
+			todayDues.destroy();
+		}
+
+		req.flash("success", "pencatatan iuran dibatalkan");
+		res.redirect(baseRoute + "/");
+	} catch (error) {
+		req.flash("error", `gagal membatalkan pencatatan iuran: ${error.message}`);
+		res.redirect(baseRoute + "/");
+	}
+}

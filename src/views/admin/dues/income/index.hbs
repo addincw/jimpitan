@@ -122,7 +122,19 @@
 									<button type="submit"></button>
 								</form>
 							{{else}}
-								<p class="text-success">Rp.500</p>
+								<button
+									class="btn btn-link text-success"
+									type="button"
+									title="batalkan terima iuran"
+									x-on:click="() => confirmCollectCancellation({{stringify item}})"
+								>
+									<span class="d-none d-sm-inline">Rp. 500</span>
+									<i class="fas fa-times ml-1"></i>
+								</button>
+								<form id="form-collect-cancellation-{{item.id}}" class="d-none m-0" action="{{../baseRoute}}/{{item.id}}" method="post">
+									{{{method 'DELETE'}}}
+									<button type="submit"></button>
+								</form>
 							{{/if}}
 						</td>
 					</tr>
@@ -225,6 +237,19 @@
 					.then((result) => {
 						if (result.isConfirmed) {
 							document.getElementById(`form-collect-${resident.id}`).submit();
+						}
+					})
+			},
+			confirmCollectCancellation(resident) {
+				Swal.fire({
+					showCancelButton: true,
+					title: 'Konfirmasi Batal Terima Iuran',
+					text: `Batal Terima Iuran dari ${resident.user.firstname} ${resident.user.lastname} sebesar Rp.500`,
+					icon: 'warning',
+				})
+					.then((result) => {
+						if (result.isConfirmed) {
+							document.getElementById(`form-collect-cancellation-${resident.id}`).submit();
 						}
 					})
 			},
