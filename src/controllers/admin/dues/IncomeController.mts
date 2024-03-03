@@ -52,9 +52,20 @@ export async function index(req: Request, res: Response, next: NextFunction) {
 	const { filters, wheres: filterWheres } = genWhereByFilters(req.query);
 
 	const page = req.query.p ? parseInt(req.query.p as string) : 1;
-	const perPage = req.query.pp ? parseInt(req.query.pp as string) : 10;
 
-	const perPageOpts = [10, 20];
+	let perPage: number;
+	if (!req.query.pp || req.query.pp === "all") {
+		perPage = await UserResident.count({
+			where: {
+				...filterWheres,
+				resident_assoc_id: userFunctionary.resident_assoc_id,
+			},
+		});
+	} else {
+		perPage = parseInt(req.query.pp as string);
+	}
+
+	const perPageOpts = [10, 20, "all"];
 
 	const offset = (page - 1) * perPage;
 
@@ -107,7 +118,7 @@ export async function index(req: Request, res: Response, next: NextFunction) {
 			pagination: {
 				currentPage,
 				totalPages,
-				perPage,
+				perPage: !req.query.pp || req.query.pp === "all" ? "all" : perPage,
 				offset,
 				showFrom: currentPage * perPage - (perPage - 1),
 				showTo: (currentPage - 1) * perPage + data.rows.length,
