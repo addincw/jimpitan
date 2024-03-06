@@ -166,9 +166,7 @@
 							if (uncollectedDays === 0) return;
 							
 							const uncollectedTotal = 500 * uncollectedDays;
-							const uncollectedTotalFmt = new Intl.NumberFormat("id-ID", {
-								maximumSignificantDigits: 2,
-							}).format(uncollectedTotal);
+							const uncollectedTotalFmt = new Intl.NumberFormat("id-ID").format(uncollectedTotal);
 
 							root.duesinfo = `Terdapat ${uncollectedDays} hari iuran belum diterima di rentan tanggal \"${value.duesrange}\"`;
 							root.duestotal = `Rp. ${uncollectedTotalFmt}`;

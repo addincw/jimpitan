@@ -6,8 +6,9 @@ import moment from "moment";
 import { UserAttributes } from "../../../../database/models/models";
 import * as DuesReportService from "../../../services/DuesReportService.mjs";
 
+import { toFormatCurrency } from "../../../helpers/string.mjs";
 import db from "../../../../database/models/index.cjs";
-const { sequelize, ResidentAssoc, ResidentAssocDue, User, UserResident, UserFunctionary } = db;
+const { ResidentAssoc, ResidentAssocDue, User, UserResident, UserFunctionary } = db;
 
 const baseRoute = "/admin/dues/expense";
 const baseRouteView = baseRoute.replace(new RegExp("^/"), "");
@@ -116,9 +117,7 @@ export async function index(req: Request, res: Response, next: NextFunction) {
 				const flattenRow = row.toJSON();
 				return {
 					...flattenRow,
-					amount: new Intl.NumberFormat("id-ID", {
-						maximumSignificantDigits: 2,
-					}).format(flattenRow.amount),
+					amount: toFormatCurrency(flattenRow.amount),
 					date: moment(flattenRow.date).format("DD, MMM YYYY. HH:MM"),
 					createdAt: moment(flattenRow.createdAt).format("DD, MMM YYYY. HH:MM"),
 					updatedAt: moment(flattenRow.updatedAt).format("DD, MMM YYYY. HH:MM"),

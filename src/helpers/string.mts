@@ -18,5 +18,5 @@ export function generateRandomRGBColor(opacity = "1") {
 }
 
 export function toFormatCurrency(value = 0) {
-	return new Intl.NumberFormat("id-ID", { maximumSignificantDigits: 2 }).format(value);
+	return new Intl.NumberFormat("id-ID").format(value);
 }
