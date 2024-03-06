@@ -87,7 +87,7 @@ router.use((_, res: Response, next) => {
 	next();
 });
 router.get("/dues/income", IncomeController.index);
-router.put("/dues/income/:id", IncomeController.store);
+router.post("/dues/income", IncomeController.store);
 router.delete("/dues/income/:id", IncomeController.destroy);
 
 router.use((_, res: Response, next) => {

@@ -99,8 +99,18 @@ export async function index(req: Request, res: Response, next: NextFunction) {
 		const totalPages = Math.ceil(data.count / perPage);
 		const currentPage = page;
 
+		const residents = await UserResident.findAll({
+			where: {
+				resident_assoc_id: {
+					[Op.eq]: userFunctionary.resident_assoc_id,
+				},
+			},
+			include: ["user"],
+		});
+
 		res.render(baseRouteView + "/index", {
 			title: `Kepala Keluarga ${residentAssoc.name}, ${communityAssoc.name}`,
+			residents: residents.map((resident) => resident.toJSON()),
 			data: data.rows.map((row) => {
 				const flattenRow = row.toJSON();
 				return {
@@ -128,36 +138,60 @@ export async function index(req: Request, res: Response, next: NextFunction) {
 }
 
 export async function store(req: Request, res: Response) {
-	const { id } = req.params;
+	const { user_resident_id, duesrange = moment().format("MM/DD/YYYY") } = req.body;
 
 	const userFunctionary = await getUserFunctionaryLoggedIn(req.user);
 
 	try {
-		const todayDues = await ResidentAssocDue.findOne({
+		const [duesfrom, duesto = moment()] = duesrange.split(" - ").map((date: string) => moment(date));
+		const totalDays = duesto.diff(duesfrom, "days");
+
+		const duesDates = [];
+		for (let i = 0; i <= totalDays; i++) {
+			duesDates.push(moment(duesfrom).add(i, "day").format("YYYY-MM-DD"));
+		}
+
+		const duesDatesFmt = duesDates.map((date) => `'${date}'`).join(", ");
+		const duesCollecteds = await ResidentAssocDue.findAndCountAll({
 			where: {
 				resident_assoc_id: userFunctionary.resident_assoc_id,
-				user_resident_id: id,
+				user_resident_id,
 				date: {
-					[Op.and]: [Sequelize.literal(`DATE(date) = '${moment().format("YYYY-MM-DD")}'`)],
+					[Op.and]: [Sequelize.literal(`DATE(date) in (${duesDatesFmt})`)],
 				},
 			},
-			raw: true,
 		});
 
-		if (!todayDues) {
+		if (duesCollecteds.count !== duesDates.length) {
+			const uncollectedDates = duesDates.filter((dateToCollect) => {
+				const duesCollected = duesCollecteds.rows.find((dues) => {
+					const duesFlatten = dues.toJSON();
+					const duesCollectedDate = moment(duesFlatten.date).format("YYYY-MM-DD");
+
+					return duesCollectedDate === dateToCollect;
+				});
+
+				return !duesCollected;
+			});
+
 			// TODO: timezone client (+7) and server different, need some adjustment for storing data
 			// temporary fix, with adding +7 before store
-			const date = moment().add(7, "hours").format("YYYY-MM-DD HH:mm:ss");
+			const time = moment().add(7, "hours").format("HH:mm:ss");
 
-			const dueCreated = await ResidentAssocDue.create({
-				resident_assoc_id: userFunctionary.resident_assoc_id,
-				user_resident_id: parseInt(id),
-				user_functionary_id: userFunctionary.id,
-				amount: 500,
-				description: "iuran jimpitan",
-				type: 0, // in,
-				date,
+			const duesCollectings = [];
+			uncollectedDates.forEach((uncollectedDate) => {
+				duesCollectings.push({
+					resident_assoc_id: userFunctionary.resident_assoc_id,
+					user_resident_id: parseInt(user_resident_id),
+					user_functionary_id: userFunctionary.id,
+					amount: 500,
+					description: "iuran jimpitan",
+					type: 0, // in,
+					date: `${uncollectedDate} ${time}`,
+				});
 			});
+
+			await ResidentAssocDue.bulkCreate(duesCollectings);
 		}
 
 		req.flash("success", "iuran telah tersimpan");

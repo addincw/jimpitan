@@ -1,4 +1,4 @@
-{{#content 'styles'}}
+{{#content 'styles' mode='append'}}
 <link rel="stylesheet" href="/plugins/select2/css/select2.min.css" />
 <style>
 	.card-header.filter {
@@ -41,7 +41,9 @@
 				<span class="form-text">Entries</span>
 			</div>
 		</div>
-		<div class="card-tools"></div>
+		<div class="card-tools">
+			{{> due/income-form-modal }}
+		</div>
 	</div>
 	{{!-- filters --}}
 	<div class="card-header filter">
@@ -117,8 +119,8 @@
 									<i class="fas fa-check mr-1"></i>
 									<span class="d-none d-sm-inline">Terima</span>
 								</button>
-								<form id="form-collect-{{item.id}}" class="d-none m-0" action="{{../baseRoute}}/{{item.id}}" method="post">
-									{{{method 'PUT'}}}
+								<form id="form-collect-{{item.id}}" class="d-none m-0" action="{{../baseRoute}}" method="post">
+									<input type="hidden" name="user_resident_id" value="{{ item.id }}">
 									<button type="submit"></button>
 								</form>
 							{{else}}
@@ -128,7 +130,7 @@
 									title="batalkan terima iuran"
 									x-on:click="() => confirmCollectCancellation({{stringify item}})"
 								>
-									<span class="d-none d-sm-inline">Rp. 500</span>
+									<span class="d-sm-inline">Rp. 500</span>
 									<i class="fas fa-times ml-1"></i>
 								</button>
 								<form id="form-collect-cancellation-{{item.id}}" class="d-none m-0" action="{{../baseRoute}}/{{item.id}}" method="post">
@@ -182,7 +184,7 @@
 	</div>
 </div>
 
-{{#content 'scripts'}}
+{{#content 'scripts' mode="append"}}
 <script type="text/javascript" src="/plugins/select2/js/select2.full.min.js"></script>
 <script>
 	function initTableData() {

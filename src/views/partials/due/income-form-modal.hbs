@@ -1,0 +1,182 @@
+{{#content "styles" mode="append"}}
+	<link rel="stylesheet" href="/plugins/select2/css/select2.min.css" />
+	<link rel="stylesheet" href="/plugins/daterangepicker/daterangepicker.css" />
+{{/content}}
+
+<!-- Button trigger modal -->
+<button
+	class="btn btn-success"
+	data-toggle="modal"
+	data-target="#incomeFormModal"
+	data-backdrop="static"
+	data-keyboard="false"
+>
+	<i class="far fa-calendar-check me-1"></i>
+	Collect Iuran Tgl Berbeda
+</button>
+
+<!-- Modal -->
+<div
+	x-data="initIncomeFormModal()"
+	class="modal fade"
+	id="incomeFormModal"
+	tabindex="-1"
+	role="dialog"
+	aria-labelledby="incomeFormModalLabel"
+	aria-hidden="true"
+>
+	<div class="modal-dialog" role="document">
+		<template x-if="loading">
+			{{! TODO: When overlay el show, prevent el under it can clickable }}
+			<div class="overlay" onclick="e.stopPropagation();">
+				<i class="fas fa-2x fa-sync fa-spin"></i>
+			</div>
+		</template>
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="incomeFormModalLabel">Collect Iuran Tgl Berbeda</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<form class="collect" action="{{baseRoute}}" method="POST">
+					<div class="form-group">
+						<label for="rw" class="form-label d-block">Kepala Keluarga</label>
+						<select
+							class="form-control select2"
+							name="user_resident_id"
+							aria-label="Pilih Kepala Keluarga"
+							style="width: 100%;"
+						>
+							<option value=""></option>
+							{{#each residents as |resident|}}
+								<option value="{{resident.id}}">
+									{{resident.user.firstname}}
+									{{resident.user.lastname}}
+								</option>
+							{{/each}}
+						</select>
+					</div>
+					<div class="form-group">
+						<label>Rentan Tgl Iuran</label>
+						<div class="input-group">
+							<div class="input-group-prepend">
+								<span class="input-group-text">
+									<i class="far fa-calendar-alt"></i>
+								</span>
+							</div>
+							<input type="text" class="form-control float-right" name="duesrange" />
+						</div>
+
+					</div>
+				</form>
+			</div>
+			<template x-if="duesinfo">
+				<div class="m-0 p-0">
+					<div class="alert alert-info mb-0 rounded-0 d-flex">
+						<i class="icon fas fa-info-circle mt-1"></i>
+						<span x-text="duesinfo"></span>
+					</div>
+				</div>
+			</template>
+			<div class="modal-footer justify-content-between">
+				<div class="form-group">
+					<label class="mb-0" for="">Total Iuran</label>
+					<p class="mb-0" x-text="duestotal"></p>
+				</div>
+				<div class="action">
+					<button
+						type="button"
+						class="btn btn-success"
+						x-on:click="handleSubmit"
+						x-bind:disabled="!duesinfo || loading"
+					>
+						<i class="fas fa-check mr-1"></i>
+						Terima
+					</button>
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+{{#content "scripts" mode="append"}}
+	<script type="text/javascript" src="/plugins/select2/js/select2.full.min.js"></script>
+	<script type="text/javascript" src="/plugins/daterangepicker/moment.min.js"></script>
+	<script type="text/javascript" src="/plugins/daterangepicker/daterangepicker.js"></script>
+	{{!-- prettier-ignore --}}
+	<script type="text/javascript">
+		function initIncomeFormModal() { 
+			return {
+				form: {
+					userResidentId: "",
+					duesrange: "",
+				},
+				duesinfo: null,
+				duestotal: "Rp. 0",
+				loading: false,
+				async fetchUncollectedDates() {
+					this.loading = true;
+
+					const qParams = new URLSearchParams();
+					qParams.append('uri', this.form.userResidentId);
+					qParams.append('dr', this.form.duesrange);
+
+					const fetchData = await fetch('/api/dues/income/uncollected?' + qParams.toString());
+
+					if (fetchData.status !== 200) return {};
+
+					const data = await fetchData.json();
+
+					this.loading = false;
+
+					return data;
+				},
+				handleSubmit() {
+					if (this.duesinfo) {
+						$('form.collect').submit();
+					}
+				},
+				init() {
+					const root = this;
+
+					$('.select2[name="user_resident_id"]').select2({
+						placeholder: "Pilih Kepala Keluarga",
+						allowClear: true,
+					});
+					$('.select2[name="user_resident_id"]').change(function() {
+						root.form.userResidentId = $(this).val();
+					});
+
+					$('input[name="duesrange"]').daterangepicker();
+					$('input[name="duesrange"]').change(function() {
+						root.form.duesrange = $(this).val();
+					});
+
+					root.form.duesrange = $('input[name="duesrange"]').val();
+
+					this.$watch('form', async (value) => {
+						if (value.userResidentId && value.duesrange) {
+							const result = await root.fetchUncollectedDates();
+
+							const uncollectedDays = result.date_uncollected.length;
+
+							if (uncollectedDays === 0) return;
+							
+							const uncollectedTotal = 500 * uncollectedDays;
+							const uncollectedTotalFmt = new Intl.NumberFormat("id-ID", {
+								maximumSignificantDigits: 2,
+							}).format(uncollectedTotal);
+
+							root.duesinfo = `Terdapat ${uncollectedDays} hari iuran belum diterima di rentan tanggal \"${value.duesrange}\"`;
+							root.duestotal = `Rp. ${uncollectedTotalFmt}`;
+						}
+					});
+				}
+			}
+		}
+	</script>
+	{{!-- prettier-ignore --}}
+{{/content}}

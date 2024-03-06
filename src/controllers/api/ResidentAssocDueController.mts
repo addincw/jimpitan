@@ -171,3 +171,22 @@ export async function getReportInOut(req: Request, res: Response) {
 		return res.status(500).json({ message: error.message });
 	}
 }
+
+export async function getReportUncollectedDates(req: Request, res: Response) {
+	const { uri, dr } = req.query;
+
+	if (!uri) {
+		return res.status(400).json({ message: "param uri is required" });
+	}
+
+	try {
+		const result = await DuesReportService.getReportUncollectedDates({
+			user_resident_id: uri as string,
+			duesrange: dr as string,
+		});
+
+		return res.json(result);
+	} catch (error) {
+		return res.status(500).json({ message: error.message });
+	}
+}
