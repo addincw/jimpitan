@@ -23,13 +23,28 @@
 		<meta property="og:image:width" content="300" />
 		<meta property="og:image:height" content="271" />
 		<link rel="stylesheet" href="/plugins/fontawesome-free/css/all.min.css" />
-		<link rel="stylesheet" href="/plugins/sweetalert2/sweetalert2.min.css" />
-		{{#block "styles"}}{{/block}}
+		{{#block "styles"}}
+			<link rel="stylesheet" href="/plugins/sweetalert2/sweetalert2.min.css" />
+		{{/block}}
 		<link rel="stylesheet" href="/css/adminlte.min.css" />
+		{{!-- prettier-ignore --}}
 		<style>
-			.form-control.select2.is-invalid ~ .select2 > .selection > .select2-selection { border-color: #dc3545;}
-			.content-wrapper { height: max-content; }
+			.form-control.select2.is-invalid ~ .select2 > .selection > .select2-selection {
+				border-color: #dc3545;
+			}
+			.content-wrapper {
+				height: max-content;
+			}
+			@media (max-width: 767px) {
+				.card .card-header .card-tools {
+					float: none;
+				}
+				.card .card-header .card-tools button {
+					margin-top: 16px;
+				}
+			}
 		</style>
+		{{!-- prettier-ignore --}}
 	</head>
 	<body class="sidebar-mini layout-fixed">
 		<!-- Site wrapper -->
@@ -103,7 +118,7 @@
 										<i class="nav-icon fas fa-id-badge"></i>
 										<p>Kepala Keluarga (KK)</p>
 									</a>
-								</li>							
+								</li>
 								<li class="nav-header">IURAN WARGA</li>
 								<li class="nav-item">
 									<a href="/admin/dues/income" class="nav-link">
@@ -210,7 +225,8 @@
 		<script src="/plugins/sweetalert2/sweetalert2.all.min.js"></script>
 		<script src="/js/adminlte.min.js"></script>
 		<script src="/js/utils.js"></script>
-		{{#block "scripts"}}{{/block}}
-		<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+		{{#block "scripts"}}
+			<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+		{{/block}}
 	</body>
 </html>

@@ -1,4 +1,4 @@
-{{#content "styles"}}
+{{#content "styles" mode="append"}}
 	<link rel="stylesheet" href="/plugins/select2/css/select2.min.css" />
 {{/content}}
 
@@ -64,7 +64,7 @@
     {{> form/invalid-feedback fieldName="date"}}
 </div>
 
-{{#content "scripts"}}
+{{#content "scripts" mode="append"}}
 	<script type="text/javascript" src="/plugins/select2/js/select2.full.min.js"></script>
     <script>
         const userResidentSelection = $('[name="user_resident_id"]').select2({
