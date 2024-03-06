@@ -90,29 +90,39 @@
 				async initChart() {
 					const daysEachMonths = JSON.parse($('[name="daysEachMonths"]').val());
 
-					const dataMonthly = await this.fetchDataMonthly();
+					const initDataPerMonths = daysEachMonths.map(() => 0);
+
+					const dataPerMonths = await this.fetchDataMonthly();
 
 					let datasets = [];
-					dataMonthly.forEach((data) => {
-						const datasetExist = datasets.find((dataset) => dataset.id === data['resident_assoc.id']);
+					dataPerMonths.forEach((dataPerMonth) => {
+						const datasetExist = datasets.find((dataset) => dataset.id === dataPerMonth['resident_assoc.id']);
 						if (datasetExist) {
+							const data = [...datasetExist.data];
+							data[dataPerMonth['month'] - 1] = dataPerMonth['total_amount'];
+
 							datasets = [
-								...datasets.filter((dataset) => dataset.id !== data['resident_assoc.id']),
+								...datasets.filter((dataset) => dataset.id !== dataPerMonth['resident_assoc.id']),
 								{
 									...datasetExist,
-									data: [...datasetExist.data, data['total_amount']],
+									data,
 								},
 							];
 							return;
 						}
 
+						const data = [...initDataPerMonths];
+						data[dataPerMonth['month'] - 1] = dataPerMonth['total_amount'];
+
 						datasets.push({
-							id: data['resident_assoc.id'],
-							label: data['resident_assoc.name'] + ", " + data['resident_assoc.community_assoc.name'],
-							backgroundColor: data['resident_assoc.color_code'],
-							data: [data['total_amount']]
+							id: dataPerMonth['resident_assoc.id'],
+							label: dataPerMonth['resident_assoc.name'] + ", " + dataPerMonth['resident_assoc.community_assoc.name'],
+							backgroundColor: dataPerMonth['resident_assoc.color_code'],
+							data,
 						});
 					});
+
+					console.log(dataPerMonths, datasets);
 					
 					this.chartInstance = new Chart($("#jimpitan-statistics"), {
 						type: "bar",
