@@ -21,7 +21,6 @@
   position: absolute;
   display: inline-block;
   border-bottom-color: rgba(0, 0, 0, 0.2);
-  content: '';
 }
 
 .daterangepicker:before {
@@ -265,12 +264,16 @@
 
 .daterangepicker .drp-buttons {
   clear: both;
-  text-align: right;
+  text-align: left;
   padding: 8px;
   border-top: 1px solid #ddd;
   display: none;
   line-height: 12px;
   vertical-align: middle;
+}
+
+.daterangepicker .drp-buttons .applyBtn.btn {
+  margin-left: 4px;
 }
 
 .daterangepicker .drp-selected {
@@ -340,6 +343,10 @@
     width: auto;
   }
 
+  .daterangepicker:before, .daterangepicker:after {
+    content: '';
+  }
+
   .daterangepicker .ranges ul {
     width: 140px;
   }
@@ -388,6 +395,14 @@
 
   .daterangepicker .ranges, .daterangepicker .drp-calendar {
     float: left;
+  }
+
+  .daterangepicker .drp-buttons {
+    text-align: right;
+  }
+
+  .daterangepicker .drp-buttons .applyBtn.btn {
+    margin-left: 8px;
   }
 }
 

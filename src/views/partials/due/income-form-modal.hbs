@@ -66,7 +66,7 @@
 									<i class="far fa-calendar-alt"></i>
 								</span>
 							</div>
-							<input type="text" class="form-control float-right" name="duesrange" />
+							<input type="text" class="form-control float-right" name="duesrange" readonly />
 						</div>
 
 					</div>
@@ -145,12 +145,20 @@
 					$('.select2[name="user_resident_id"]').select2({
 						placeholder: "Pilih Kepala Keluarga",
 						allowClear: true,
+						dropdownParent: $('#incomeFormModal'),
 					});
 					$('.select2[name="user_resident_id"]').change(function() {
 						root.form.userResidentId = $(this).val();
 					});
 
 					$('input[name="duesrange"]').daterangepicker();
+					$('input[name="duesrange"]').on('show.daterangepicker', function (e) {
+						const isMobile = $(window).width() < 564;
+						if (isMobile) {
+							const modalTop = $('#incomeFormModal .modal-content').offset().top;
+							$('.daterangepicker').css('top', modalTop);
+						}
+					});
 					$('input[name="duesrange"]').change(function() {
 						root.form.duesrange = $(this).val();
 					});
