@@ -1114,6 +1114,8 @@
                     });
                 }
             }
+
+            this.element.trigger("move.daterangepicker", this);
         },
 
         show: function(e) {

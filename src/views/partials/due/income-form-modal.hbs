@@ -108,6 +108,15 @@
 	<script type="text/javascript" src="/plugins/daterangepicker/daterangepicker.js"></script>
 	{{!-- prettier-ignore --}}
 	<script type="text/javascript">
+		const isMobile = $(window).width() < 564;
+
+		function setDaterangepickerPosInMobile() {
+			if (isMobile) {
+				const modalTop = $('#incomeFormModal .modal-content').offset().top;
+				$('.daterangepicker').css('top', modalTop);
+			}
+		}
+
 		function initIncomeFormModal() { 
 			return {
 				form: {
@@ -142,6 +151,8 @@
 				init() {
 					const root = this;
 
+					const currentDate = moment().format('MM/DD/YYYY');
+
 					$('.select2[name="user_resident_id"]').select2({
 						placeholder: "Pilih Kepala Keluarga",
 						allowClear: true,
@@ -151,19 +162,24 @@
 						root.form.userResidentId = $(this).val();
 					});
 
-					$('input[name="duesrange"]').daterangepicker();
-					$('input[name="duesrange"]').on('show.daterangepicker', function (e) {
-						const isMobile = $(window).width() < 564;
-						if (isMobile) {
-							const modalTop = $('#incomeFormModal .modal-content').offset().top;
-							$('.daterangepicker').css('top', modalTop);
-						}
-					});
+					$('input[name="duesrange"]').daterangepicker({ autoApply: isMobile });
+					$('input[name="duesrange"]').on('move.daterangepicker', setDaterangepickerPosInMobile);
+
 					$('input[name="duesrange"]').change(function() {
 						root.form.duesrange = $(this).val();
 					});
 
 					root.form.duesrange = $('input[name="duesrange"]').val();
+
+					$("#incomeFormModal").on('show.bs.modal', function () {
+						$('.select2[name="user_resident_id"]').val('').trigger('change');
+
+						$('input[name="duesrange"]').data('daterangepicker').setStartDate(currentDate);
+						$('input[name="duesrange"]').data('daterangepicker').setEndDate(currentDate);
+
+						root.duesinfo = "";
+						root.duestotal = "Rp. 0";
+					});
 
 					this.$watch('form', async (value) => {
 						if (value.userResidentId && value.duesrange) {
