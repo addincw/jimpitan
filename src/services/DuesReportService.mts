@@ -94,7 +94,10 @@ export async function getReportUncollectedDates(params: GetReportUncollectedDate
 	});
 
 	const collectedDates = duesCollecteds.rows.map((dues) => {
-		return moment(dues.toJSON().date).format("YYYY-MM-DD");
+		// TODO: temporary fix difference timezone, need to fix
+		return moment(dues.toJSON().date)
+			.subtract(7, "hours")
+			.format("YYYY-MM-DD");
 	});
 
 	const uncollectedDates = duesDates.filter((duesDate) => {
