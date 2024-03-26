@@ -136,7 +136,7 @@
 	</div>
 
 	<nav
-		class="d-flex flex-column flex-md-row align-items-center justify-content-between"
+		class="d-flex flex-column flex-md-row align-items-center justify-content-between overflow-auto"
 		aria-label="Paginasi Riwayat Jimpitan Warga"
 	>
 		<p x-text="`Showing ${data_show.from} to ${data_show.to} of ${data_total} entries`"></p>
@@ -148,13 +148,16 @@
 					x-bind:disabled="!pagination.page_prev"
 					x-on:click="goToPrevPage()"
 				>
-					Previous
+					Prev
 				</a>
 			</li>
-			<template x-for="page in pagination.page_total">
+			<template x-for="page in pages">
 				<li
 					class="page-item"
-					x-bind:class="pagination.page === page && 'active'"
+					x-bind:class="{
+						'active': pagination.page === page,
+						'disabled': page === '...',
+					}"
 					x-bind:aria-current="pagination.page === page && 'page'"
 				>
 					<a class="page-link" x-on:click.prevent="pagination.page = page;" x-text="page"></a>
@@ -201,6 +204,7 @@
 					page_next: null,
 					page_prev: null,
 				},
+				pages: [1],
 				init() {
 					const root = this;
 
@@ -259,6 +263,8 @@
 					this.pagination.page_prev = pagination.page_prev;
 					this.pagination.page_next = pagination.page_next;
 					this.pagination.page_total = pagination.page_total;
+
+					this.generatePages();
 				},
 				formatMonthDate(date) {
 					const datePrefixed = date < 10 ? `0${date}` : date;
@@ -283,6 +289,68 @@
 						qParams.append('f.month', this.filters.month);
 					}
 					return qParams;
+				},
+				generatePages() {
+					const root = this;
+
+					const currentPage = this.pagination.page;
+
+					const pagesToDisplay = 3;
+					const pagesToDisplayFromBack = [...Array(pagesToDisplay).keys()]
+						.reverse()
+						.map((page) => {
+							return root.pagination.page_total - page;
+						});
+					
+					// if total pages does not exceed pagesToDisplay, show all pages
+					if (this.pagination.page_total <= pagesToDisplay) {
+						return this.pages = [...Array(this.pagination.page_total).keys()].map((page) => {
+							return page + 1;
+						});
+					}
+
+					// truncate page base on pagesToDisplay
+					let pages = [1];
+
+					// show 1, 2, 3
+					if (currentPage < pagesToDisplay) {
+						for (let i = 2; i <= pagesToDisplay; i++) {
+							pages.push(i);
+						}
+					}
+
+					if (currentPage >= pagesToDisplay) {
+						pages.push('...');
+
+						// show 1, ..., 8, 9, 10
+						if (pagesToDisplayFromBack.includes(currentPage)) {
+							pages = pages.concat(pagesToDisplayFromBack);
+						} else {
+							// show 1, ..., 4, 5, 6
+							let i = currentPage;
+							let pagesHasDisplay = 0;
+
+							if (currentPage === this.pagination.page_total) {
+								i = this.pagination.page_total - (pagesToDisplay - 1);
+							}
+
+							while (pagesHasDisplay < pagesToDisplay) {
+								if (i + pagesHasDisplay > 1) {
+									pages.push(i + pagesHasDisplay);
+								}
+
+								pagesHasDisplay += 1;
+							}
+						}
+					}
+
+					// show 1, 2, 3, ..., 10
+					if (!pages.includes(this.pagination.page_total) && this.pagination.page_total > pagesToDisplay) {
+						pages.push('...');
+						pages.push(this.pagination.page_total);
+					}
+
+					this.pages = pages;
 				},
 				goToPrevPage() {
 					if (!this.pagination.page_prev) return;
