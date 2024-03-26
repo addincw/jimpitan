@@ -8,6 +8,13 @@
 		padding-top: 0.6rem;
 		padding-bottom: 0.6rem;
 	}
+
+	.card-footer .pagination .page-item {
+		cursor: pointer;
+	}
+	.card-footer .pagination .page-item.disabled {
+		cursor: no-drop !important;
+	}
 </style>
 {{/content}}
 
@@ -157,11 +164,7 @@
 		<div
 			class="d-flex flex-column flex-md-row align-items-center justify-content-between"
 		>
-			<p class="m-0 mb-3 mb-sm-0">Showing
-				{{pagination.showFrom}}
-				to {{pagination.showTo}} of
-				{{pagination.totalCount}}
-				entries</p>
+			<p class="m-0 mb-3 mb-sm-0" x-text="`Showing ${pagination.showFrom} to ${pagination.showTo} of ${pagination.totalCount} entries`"></p>
 			<ul class="pagination m-0">
 				<li class="page-item {{echoif (eq pagination.currentPage 1) 'disabled'}}">
 					<a
@@ -173,11 +176,18 @@
 						«
 					</a>
 				</li>
-				{{#for 1 (increment pagination.totalPages 1)}}
-					<li class="page-item{{#if (eq ../pagination.currentPage this)}} active {{/if}}">
-						<a class="page-link" href="#" x-on:click.prevent="pagination.currentPage = {{this}};">{{this}}</a>
+				<template x-for="page in pages">
+					<li
+						class="page-item"
+						x-bind:class="{
+							'active': pagination.currentPage === page,
+							'disabled': page === '...',
+						}"
+						x-bind:aria-current="pagination.currentPage === page && 'page'"
+					>
+						<a class="page-link" x-on:click.prevent="pagination.currentPage = page;" x-text="page"></a>
 					</li>
-				{{/for}}
+				</template>
 				<li class="page-item {{echoif (eq pagination.currentPage pagination.totalPages) 'disabled'}}">
 					<a
 						class="page-link"
@@ -200,6 +210,7 @@
 		return {
 			filters: JSON.parse($('[name="init.filters"]').val()),
 			pagination: JSON.parse($('[name="init.pagination"]').val()),
+			pages: [1],
 			get isFiltersEmpty() {
 				return !this.filters.communityAssocId && !this.filters.residentAssocId && !this.filters.q;
 			},
@@ -225,6 +236,68 @@
 			clearFilters() {
 				window.location.href = '{{baseRoute}}';
 			},
+			generatePages() {
+				const root = this;
+
+				const currentPage = this.pagination.currentPage;
+
+				const pagesToDisplay = 3;
+				const pagesToDisplayFromBack = [...Array(pagesToDisplay).keys()]
+					.reverse()
+					.map((page) => {
+						return root.pagination.totalPages - page;
+					});
+				
+				// if total pages does not exceed pagesToDisplay, show all pages
+				if (this.pagination.totalPages <= pagesToDisplay) {
+					return this.pages = [...Array(this.pagination.totalPages).keys()].map((page) => {
+						return page + 1;
+					});
+				}
+
+				// truncate page base on pagesToDisplay
+				let pages = [1];
+
+				// show 1, 2, 3
+				if (currentPage < pagesToDisplay) {
+					for (let i = 2; i <= pagesToDisplay; i++) {
+						pages.push(i);
+					}
+				}
+
+				if (currentPage >= pagesToDisplay) {
+					pages.push('...');
+
+					// show 1, ..., 8, 9, 10
+					if (pagesToDisplayFromBack.includes(currentPage)) {
+						pages = pages.concat(pagesToDisplayFromBack);
+					} else {
+						// show 1, ..., 4, 5, 6
+						let i = currentPage;
+						let pagesHasDisplay = 0;
+
+						if (currentPage === this.pagination.totalPages) {
+							i = this.pagination.totalPages - (pagesToDisplay - 1);
+						}
+
+						while (pagesHasDisplay < pagesToDisplay) {
+							if (i + pagesHasDisplay > 1) {
+								pages.push(i + pagesHasDisplay);
+							}
+
+							pagesHasDisplay += 1;
+						}
+					}
+				}
+
+				// show 1, 2, 3, ..., 10
+				if (!pages.includes(this.pagination.totalPages) && this.pagination.totalPages > pagesToDisplay) {
+					pages.push('...');
+					pages.push(this.pagination.totalPages);
+				}
+
+				this.pages = pages;
+			},			
 			goToPrevPage() {
 				if (this.pagination.currentPage === 1) return;
 
@@ -282,6 +355,8 @@
 				if (root.filters.communityAssocId) {
 					$('[name="f.community_assoc_id"]').val(root.filters.communityAssocId).trigger('change');
 				}
+
+				this.generatePages();
 
 				this.$watch('pagination', (value) => {
 					const { currentPage, perPage } = value;
